@@ -27,10 +27,10 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
   const captureLeft = pieceColor === "white" ? position - 9 : position + 9;
   const captureRight = pieceColor === "white" ? position - 7 : position + 7;
   // console.log(captureLeft,captureRight)
-  if (isCapturePossible(captureLeft, pieceColor, board)) {
+  if (isCapturePossible(captureLeft, pieceColor, board, position)) {
     possibleMoves.push(captureLeft);
   }
-  if (isCapturePossible(captureRight, pieceColor, board)) {
+  if (isCapturePossible(captureRight, pieceColor, board, position)) {
     possibleMoves.push(captureRight);
   }
 
@@ -58,16 +58,22 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
     return board[position] === "";
   };
   
-  const isCapturePossible = (position, pieceColor, board) => {
-    // console.log(position, pieceColor, board)
+  const isCapturePossible = (position, pieceColor, board, curPosition) => {
     if (position >= 0 && position < 64) {
       const piece = board[position];
-      const attackedPiecColor = piece.toLowerCase() === piece ? 'black' : 'white';
-      return piece !== "" && attackedPiecColor !== pieceColor;
+      const attackedPieceColor = piece.toLowerCase() === piece ? 'black' : 'white';
+      const currentRow = Math.floor(curPosition / 8);
+      const newPositionRow = Math.floor((position  ) / 8);
+     console.log(newPositionRow, currentRow, position)
+     
+        // Move within the same row, so it's a legal move
+        return piece !== "" && attackedPieceColor !== pieceColor && Math.abs(currentRow - newPositionRow)=== 1;
+        // attacked place not empty, it is an enemy, the pawn move only by one row
+      
     }
+    
     return false;
   };
-  
   const isEnPassantPossible = (enPassantTo, enPassantCapture, pieceColor, board, lastTurn) => {
     if (enPassantTo >= 0 && enPassantTo < 64 && lastTurn) {
       
@@ -76,11 +82,11 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
       const lastFrom = lastTurn.from;
       const lastTo = lastTurn.to;
       const attackedPiecColor = piece.toLowerCase() === piece ? 'black' : 'white';
-   
-      if (piece === "" && attackedPiecColor !== pieceColor) {
-        console.log( lastFrom , enPassantTo +8, enPassantCapture )
-        console.log(lastPiece === "p" ,pieceColor === "white" ,lastFrom === enPassantTo + 8 ,lastTo === enPassantCapture  )
-        console.log(lastPiece === "P" ,pieceColor === "black" , lastFrom === enPassantTo - 8,lastTo === enPassantCapture )
+      // console.log(piece === "", attackedPiecColor, pieceColor)
+      if (piece === "" && attackedPiecColor !== pieceColor, board[enPassantCapture]) {
+        // console.log( lastFrom , enPassantTo +8, enPassantCapture )
+        // console.log(lastPiece === "p" ,pieceColor === "white" ,lastFrom === enPassantTo + 8 ,lastTo === enPassantCapture  )
+        // console.log(lastPiece === "P" ,pieceColor === "black" , lastFrom === enPassantTo - 8,lastTo === enPassantCapture )
         if (lastPiece === "P" && pieceColor === "black" && lastFrom === enPassantTo + 8 && lastTo === enPassantCapture  ) {
           // En passant is possible for black pawn moving 2 squares forward
           return true;

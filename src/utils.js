@@ -1,3 +1,12 @@
+
+import calculateRookMoves from "./components/pieceMovements/rookMoveCalculator"
+import calculateKnightMoves from './components/pieceMovements/knightMoveCalculator';
+import calculateKingMoves from './components/pieceMovements/kingMoveCalculator';
+import calculateQueenMoves from './components/pieceMovements/queenMoveCalculator';
+import calculateBishopMoves from './components/pieceMovements/bishopMoveCalculator';
+import calculatePawnMoves from "./components/pieceMovements/pawnMoveCalculator";
+
+
 export const pieceColor = (piece) => {
     return piece.toLowerCase() === piece ? 'black' : 'white';
   };
@@ -16,27 +25,68 @@ export const pieceColor = (piece) => {
       }
     }
 
-    return {whiteKing: whiteKingPosition, black: blackKingPosition}
+    return {white: whiteKingPosition, black: blackKingPosition}
 
   }
 
   export function checkEnPassantWasPlayed( playerColor, lastTurn, thisTurn){
-    console.log(thisTurn)
-    if(!lastTurn){return}
-    console.log("D")
-    if(lastTurn.piece.toLowerCase() !== "p"){return}
-    console.log("D")
-    if (lastTurn.captured !== ""){ return }
-    console.log("D")
-    if(Math.abs(lastTurn.from - lastTurn.to) !== 16){return}
-    console.log("D")
-    if(Math.abs(thisTurn.from - thisTurn.to) !== 9 && Math.abs(thisTurn.from - thisTurn.to) !== 7 ) {return }
-    console.log("D5")
-    let capturedPiecePos = playerColor === "white" ? lastTurn.from + 16 : lastTurn.from -16
-    console.log("ENPASSANR CAPTURED PUECE IS " + capturedPiecePos)
-    return capturedPiecePos
-  
+    // console.log(thisTurn)
+    // if(!lastTurn){return}
+    // console.log("D")
+    // if(lastTurn.piece.toLowerCase() !== "p"){return}
+    // console.log("D")
+    // if (lastTurn.captured !== ""){ return }
+    // console.log("D", Math.abs(lastTurn.from - lastTurn.to))
+    // if(Math.abs(lastTurn.from - lastTurn.to) !== 16){return}
+    // console.log("D")
+    // if(Math.abs(thisTurn.from - thisTurn.to) !== 9 && Math.abs(thisTurn.from - thisTurn.to) !== 7 ) {return }
+    // console.log("D5")
+    // if(thisTurn.piece.toLowerCase() !== "p"){return}
+    // let capturedPiecePos = playerColor === "white" ? lastTurn.from + 16 : lastTurn.from -16
+    // console.log("ENPASSANR CAPTURED PUECE IS " + capturedPiecePos)
+    // return capturedPiecePos
+  return false
   };
+
+  export const calculatePossibleMoves = (id, piece, gameRep, gameHistory) => {
+     
+    const position = gameRep
+      .flat()
+      .findIndex((cellPiece, index) => index === id && cellPiece === piece);
+    const pieceColor = piece.toLowerCase() === piece ? "black" : "white";
+    const lastTurn = gameHistory[gameHistory?.length - 1] || null;
+
+    if (piece.toLowerCase() === "r") {
+      return calculateRookMoves(id, pieceColor, gameRep.flat());
+    } else if (piece.toLowerCase() === "n") {
+      return calculateKnightMoves(id, pieceColor, gameRep.flat());
+    } else if (piece.toLowerCase() === "k") {
+      return calculateKingMoves(id, pieceColor, gameRep.flat());
+    } else if (piece.toLowerCase() === "q") {
+      return calculateQueenMoves(id, pieceColor, gameRep.flat());
+    } else if (piece.toLowerCase() === "b") {
+      return calculateBishopMoves(id, pieceColor, gameRep.flat());
+    } else if (piece.toLowerCase() === "p") {
+      return calculatePawnMoves(id, pieceColor, gameRep.flat(), lastTurn);
+    }
+
+    return [];
+  };
+  
+ // const simulateMove = (gameRepresentation, from, to, piece, player) => {
+  //   const clonedGameRepresentation = JSON.parse(
+  //     JSON.stringify(gameRepresentation.flat())
+  //   );
+  //   clonedGameRepresentation[to] = piece;
+  //   clonedGameRepresentation[from] = "";
+  //   const lookedForKing = player === "black" ? "k" : "K";
+  //   const kingPosition = clonedGameRepresentation.find(
+  //     (piece) => piece == lookedForKing
+  //   );
+  //   return checkKingInCheck(kingPosition, clonedGameRepresentation);
+  // };
+
+
 
   // function checkIfPlayerCasteled(){
   //   let lastTurn = gameInformation.gameHistory[gameInformation.gameHistory.length-1];

@@ -1,3 +1,5 @@
+ 
+
 function calculateKingMoves(position, color, board) {
     const row = Math.floor(position / 8);
     const col = position % 8;
@@ -23,6 +25,7 @@ function calculateKingMoves(position, color, board) {
         const piece = board[index];
         const attackedPieceColor =piece.toLowerCase() === piece ? "black" : "white";
         // Check if the target cell is empty or contains an opponent's piece
+      
         if (piece === "" || (piece.toLowerCase() !== piece && attackedPieceColor !== color)) {
           possibleMoves.push(index);
         }
