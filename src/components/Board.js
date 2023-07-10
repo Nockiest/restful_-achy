@@ -7,6 +7,7 @@ import calculateQueenMoves from "./pieceMovements/queenMoveCalculator";
 import calculateBishopMoves from "./pieceMovements/bishopMoveCalculator";
 import calculatePawnMoves from "./pieceMovements/pawnMoveCalculator";
 import { checkWhatGetsPlayerInCheck } from "./CheckCalculator";
+import { pawnReachedBackRank, EvolvePawnPanel } from "./PawnEvolutionHandler";
 import { determineMate } from "./MateCalculator";
 import { determineDraw } from "./DrawCalculator";
 import {
@@ -19,7 +20,7 @@ import {
 const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
   const [gameRepresentation, setGameRepresentation] = useState([
   ['', '', '', '', 'K1', '', '', ''],
-   [ '', '', '', '', '', '', '', 'p1'],
+   [ '', '', 'P2', '', '', '', '', 'p1'],
   [  '', '', '', '', '', '', '', ''],
   [  '', '', '', '', '', '', '', ''],
 [    '', '', '', '', '', '', '', ''],
@@ -50,6 +51,7 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
   const [capturedPieces, setCapturedPieces] = useState([]);
   const [possibleMoves, setPossibleMoves] = useState([]);
   const [gameHistory, setGameHistory] = useState([]);
+  const [pawnToEvolveIndex, setPawnToEvolveIndex] = useState(null)
   const lastTurn = gameHistory[gameHistory.length - 1];
 
   const initializeMovedPieces = () => {
@@ -67,7 +69,7 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
   }, []);
 
   const processGameMove = (clickPos, piece) => {
-    console.log(gameHistory, movedPieces)
+     
     // Player deselcted piece
     if (selectedCell.id === clickPos) {
       setSelectedCell((prevstate) => ({ ...prevstate, id: null, piece: null }));
@@ -77,11 +79,14 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
 
     // Check if it's the second click on a valid move
     if (selectedCell.id !== null && possibleMoves.includes(clickPos)) {
+      
+      
+      
       processMovement(selectedCell.id, clickPos, selectedCell.piece, piece);
       // Unselect the piece
       setSelectedCell((prevstate) => ({ ...prevstate, id: null, piece: null }));
       setPossibleMoves([]);
-
+      
       return; // Do nothing
     }
 
@@ -108,7 +113,7 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
       [piece]: true,
     }));
 
-    //   console.log("Moved Pieces: ", movedPieces);
+     
     console.log(forbiddenMovement);
     if (forbiddenMovement.includes("king stands in check now")) {
       setInCheck((prevCheck) => {
@@ -230,6 +235,16 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
     setPossibleMoves(moves);
   };
 
+  useEffect(() => {
+    const bankRankPawnIndex = pawnReachedBackRank(gameRepresentation);
+    console.log(bankRankPawnIndex);
+    setPawnToEvolveIndex((prev) => {
+      prev = bankRankPawnIndex;
+      console.log(prev);
+      return prev;
+    });
+  }, [gameRepresentation]);
+
   return (
     <div className="game-screen">
       <div id="table">
@@ -273,6 +288,10 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
           ))}
         </div>
       </div>
+      <EvolvePawnPanel 
+      pawnToEvolveIndex={pawnToEvolveIndex} 
+      gameRepresentation={gameRepresentation}
+      curPlayer={curPlayer} />
     </div>
   );
 };
