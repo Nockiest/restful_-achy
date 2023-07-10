@@ -14,6 +14,7 @@ import {
   findKings,
   checkEnPassantWasPlayed,
   calculatePossibleMoves,
+  findIfCastled
 } from "../utils";
 const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
     const [gameRepresentation, setGameRepresentation] = useState([
@@ -25,18 +26,17 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
       // ["", "", "", "", "", "", "", ""],
       // ["P", "P", "P", "P", "P", "P", "P", "P"],
       // ["R", "N", "B", "Q", "K", "B", "N", "R"],
-      ["", "", "", "", "", "", "", ""],
+      ["rl1", "", "", "", "k1", "", "", "rr2"],
       ["q1", "", "", "", "", "", "", ""],
       ["", "", "", "", "", "", "", ""],
       ["", "", "", "", "", "", "", ""],
       ["", "", "", "", "", "", "", ""],
-      ["k1", "p1", "", "Q1", "", "", "", ""],
-      ["", "", "", "", "", "", "", "Rl1"],
-      ["", "", "", "", "K1", "", "", "Rr2"],
+      ["", "p1", "", "Q1", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["Rl1", "", "", "", "K1", "", "", "Rr2"],
     ]);
     const [enPassantPlayed, setEnpassantPlayed] = useState(false);
     const [playerCastled, setPlayerCastled] = useState(false);
-    // const [movedRooks, setMovedRooks] = useState({white:{left:false, right:false},black: {left:false, right:false}})
     const [inCheck, setInCheck] = useState(false);
     const [illegalMoves, setIllegalMoves] = useState(false);
 
@@ -98,6 +98,7 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
       movedPieces,
       inCheck
     );
+   
     setIllegalMoves(forbiddenMovement);
 
     // Find the selected piece in the movedPieces array and set its value to true
@@ -110,7 +111,12 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
   //   console.log("Moved Pieces: ", movedPieces);
 console.log(forbiddenMovement)
     if (forbiddenMovement.includes("king stands in check now")) {
-      setInCheck((prevCheck)  => {prevCheck =true ;  console.log(prevCheck)});
+     
+      setInCheck(prevCheck => {
+        console.log("prevCheck:", prevCheck); // Updated value
+        return true;
+      });
+    
       const canEscape = determineMate(
         gameRepresentation,
         currentPlayer,
@@ -134,16 +140,6 @@ console.log(forbiddenMovement)
 
   const processMovement = (selectedId, id, selectedPiece, piece) => {
     let capturedPiece = gameRepresentation[Math.floor(id / 8)][id % 8];
-    // console.log(selectedId, id, selectedPiece, piece);
-    setGameRepresentation((prevGameRepresentation) => {
-      const updatedGameRepresentation = [...prevGameRepresentation];
-      updatedGameRepresentation[Math.floor(selectedId / 8)][selectedId % 8] =
-        "";
-      updatedGameRepresentation[Math.floor(id / 8)][id % 8] = selectedPiece;
-      return updatedGameRepresentation;
-    });
-    setCapturedPieces((prevPieces) => [...prevPieces, capturedPiece]);
-
     const moveDetails = {
       color: currentPlayer,
       piece: selectedPiece,
@@ -154,6 +150,38 @@ console.log(forbiddenMovement)
 
     const updatedGameHistory = [...gameHistory, moveDetails];
     setGameHistory(updatedGameHistory);
+    console.log(selectedId, id, selectedPiece, piece,selectedPiece.toLowerCase())
+    
+    // if (selectedPiece.toLowerCase() === "k1") {
+    //   if (Math.abs(selectedId - id) !== 2) {
+    //     console.log("didn't castle");
+    //   } else {
+    //     console.log("castles");
+    //     const kingStartPosition = currentPlayer === 'white' ? 60 : 4;
+    //     const rookStartPosition = id > selectedId ? kingStartPosition + 3 : kingStartPosition - 4;
+    //     const rookFinalPosition = id > selectedId ? kingStartPosition + 1 : kingStartPosition - 1;
+    //     console.log(rookStartPosition,rookFinalPosition)
+    //     setGameRepresentation((prevGameRepresentation) => {
+    //       const updatedGameRepresentation = [...prevGameRepresentation];
+
+    //       updatedGameRepresentation[Math.floor(rookStartPosition / 8)][rookStartPosition % 8] = "";
+    //       updatedGameRepresentation[Math.floor(rookFinalPosition / 8)][rookFinalPosition % 8] = pieceColor(selectedPiece) === "white" ? "Rr2" : "Rl2";
+    //       return updatedGameRepresentation;
+    //     });
+    //   }
+    // }
+    // console.log(selectedId, id, selectedPiece, piece);
+    setGameRepresentation((prevGameRepresentation) => {
+      let updatedGameRepresentation = [...prevGameRepresentation];
+      updatedGameRepresentation = findIfCastled(gameRepresentation, currentPlayer, selectedId, id, selectedPiece)
+      updatedGameRepresentation[Math.floor(selectedId / 8)][selectedId % 8] =
+        "";
+      updatedGameRepresentation[Math.floor(id / 8)][id % 8] = selectedPiece;
+      return updatedGameRepresentation;
+    });
+    setCapturedPieces((prevPieces) => [...prevPieces, capturedPiece]);
+
+    
 
     let capturedByEnPassant = checkEnPassantWasPlayed(
       currentPlayer === "white" ? "white" : "black",

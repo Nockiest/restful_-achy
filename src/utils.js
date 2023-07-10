@@ -15,23 +15,24 @@ export const pieceColor = (piece) => {
   return piece.toLowerCase() === piece ? 'black' : 'white';
 };
 
-  export const findKings = (gameRepresentation) => {
-    let gameFlat = gameRepresentation.flat()
-    let whiteKingPosition = null;
-    let blackKingPosition = null;
-    for (let index = 0; index < gameFlat.length; index++) {
-      const piece = gameFlat[index];
-   
-      if (piece === 'K') {
-        whiteKingPosition = index;
-      } else if (piece === 'k') {
-        blackKingPosition = index;
-      }
+export const findKings = (gameRepresentation) => {
+  let gameFlat = gameRepresentation.flat();
+  let whiteKingPosition = null;
+  let blackKingPosition = null;
+
+  for (let index = 0; index < gameFlat.length; index++) {
+    const piece = gameFlat[index];
+
+    if (piece && piece[0] === 'K') {
+      whiteKingPosition = index;
+    } else if (piece && piece[0] === 'k') {
+      blackKingPosition = index;
     }
-
-    return {white: whiteKingPosition, black: blackKingPosition}
-
   }
+
+  return { white: whiteKingPosition, black: blackKingPosition };
+};
+
 
   export function checkEnPassantWasPlayed( playerColor, lastTurn, thisTurn){
     // console.log(thisTurn)
@@ -74,6 +75,27 @@ export const pieceColor = (piece) => {
       default:
         return [];
     }
+  };
+
+  export const findIfCastled = (gameRepresentation, currentPlayer, selectedId, id, selectedPiece) => {
+    if (selectedPiece.toLowerCase() === "k1") {
+      if (Math.abs(selectedId - id) !== 2) {
+        console.log("didn't castle");
+      } else {
+        console.log("castles");
+        const kingStartPosition = currentPlayer === 'white' ? 60 : 4;
+        const rookStartPosition = id > selectedId ? kingStartPosition + 3 : kingStartPosition - 4;
+        const rookFinalPosition = id > selectedId ? kingStartPosition + 1 : kingStartPosition - 1;
+        
+        const updatedGameRepresentation = [...gameRepresentation];
+        updatedGameRepresentation[Math.floor(rookStartPosition / 8)][rookStartPosition % 8] = "";
+        updatedGameRepresentation[Math.floor(rookFinalPosition / 8)][rookFinalPosition % 8] = pieceColor(selectedPiece) === "white" ? "Rr2" : "Rl2";
+        
+        return updatedGameRepresentation;
+      }
+    }
+    
+    return gameRepresentation;
   };
  // const simulateMove = (gameRepresentation, from, to, piece, player) => {
   //   const clonedGameRepresentation = JSON.parse(

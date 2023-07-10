@@ -32,8 +32,8 @@ function calculateKingMoves(position, color, board, gameHistory, movedPieces,inC
       }
     }
 
-    tryCastle(board, color, "kingside", gameHistory,movedPieces,inCheck) 
-    tryCastle(board, color, "queenside", gameHistory, movedPieces,inCheck) 
+    possibleMoves.push(tryCastle(board, color, "kingside", gameHistory,movedPieces,inCheck)) 
+    possibleMoves.push(tryCastle(board, color, "queenside", gameHistory, movedPieces,inCheck)) 
   
     return possibleMoves;
   }
@@ -42,7 +42,7 @@ function calculateKingMoves(position, color, board, gameHistory, movedPieces,inC
   
   const tryCastle = (board, currentPlayer, side, gameHistory, movedPieces,inCheck) => {
     board.flat();
-    console.log("In cehck: " + inCheck)
+   
     if(inCheck){return}
     // Determine the relevant squares based on the side parameter
     const kingStartPosition = currentPlayer === 'white' ?  60 : 4  ;
@@ -65,10 +65,12 @@ function calculateKingMoves(position, color, board, gameHistory, movedPieces,inC
     const kingMoved = movedPieces[currentPlayer === 'white' ? 'K1' : 'k1'];
     const rookMoved = movedPieces[side === 'kingside' ? (currentPlayer === 'white' ? 'Rr2' : 'rr2') : (currentPlayer === 'white' ? 'Rl2' : 'rl2')];
 
-    console.log(kingMoved, rookMoved,  currentPlayer === 'white' ? 'K1' : 'k1' ,  side === 'kingside' ? (currentPlayer === 'white' ? 'Rr2' : 'rr2') : (currentPlayer === 'white' ? 'Rl2' : 'rl2') );
+    // console.log(kingMoved, rookMoved,  currentPlayer === 'white' ? 'K1' : 'k1' ,  side === 'kingside' ? (currentPlayer === 'white' ? 'Rr2' : 'rr2') : (currentPlayer === 'white' ? 'Rl2' : 'rl2') );
     if (kingMoved || rookMoved) {
       return false;
     }
+
+    return kingFinalPosition
     // Check if the king is not in check
    
     // Check if the squares the king passes over and the final square are not under attack

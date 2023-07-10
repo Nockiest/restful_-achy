@@ -38,7 +38,7 @@ export const determineMate = (board, checkedPlayer,gameHistory,movedPieces,inChe
             // console.log(dummyBoard)
           } else {
             canKingGetOutOfCheck = true
-            console.log(canKingGetOutOfCheck)
+            console.log("can get out of check ", canKingGetOutOfCheck)
             break
           }
         }

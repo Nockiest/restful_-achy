@@ -5,7 +5,7 @@ export const determineDraw = (board, curPayer,gameHistory, movedPieces,inCheck) 
    // find the players pieces
    const playerPieces = getPlayerPieces(board, curPayer);
 // for every piece find legal moves
-   console.log(playerPieces)
+  //  console.log(playerPieces)
 // check if they put the the king in a check
 for (let i = 0; i < playerPieces.length; i++) {
     const { piece, pieceIndex } = playerPieces[i];
