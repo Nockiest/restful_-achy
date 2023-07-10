@@ -1,4 +1,5 @@
 const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
+  
   const row = Math.floor(position / 8);
   const col = position % 8;
   const possibleMoves = [];
@@ -8,7 +9,7 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
   if (firstMove) {
     const forwardOne = pieceColor === "white" ? position - 8 : position + 8;
     const forwardTwo = pieceColor === "white" ? position - 16 : position + 16;
-
+    
     if (isEmptySquare(forwardOne, board)) {
       possibleMoves.push(forwardOne);
     }
@@ -55,6 +56,7 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
   };
   
   const isEmptySquare = (position, board) => {
+  // console.log(position, board[position] === "")
     return board[position] === "";
   };
   
@@ -64,7 +66,7 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
       const attackedPieceColor = piece.toLowerCase() === piece ? 'black' : 'white';
       const currentRow = Math.floor(curPosition / 8);
       const newPositionRow = Math.floor((position  ) / 8);
-     console.log(newPositionRow, currentRow, position)
+    //  console.log(newPositionRow, currentRow, position)
      
         // Move within the same row, so it's a legal move
         return piece !== "" && attackedPieceColor !== pieceColor && Math.abs(currentRow - newPositionRow)=== 1;

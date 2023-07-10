@@ -8,7 +8,7 @@ function calculateRookMoves(position, color,  board) {
     for (let i = col - 1; i >= 0; i--) {
       const index = row * 8 + i;
       const piece = board[index];
-      console.log(piece, board[index])
+      
       const attackedPiecColor = piece.toLowerCase() === piece ? 'black' : 'white';
       if (piece === "") {
         possibleMoves.push(index);

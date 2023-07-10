@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Cell from "./Cell";
 import calculateRookMoves from "./pieceMovements/rookMoveCalculator";
 import calculateKnightMoves from "./pieceMovements/knightMoveCalculator";
@@ -7,6 +7,8 @@ import calculateQueenMoves from "./pieceMovements/queenMoveCalculator";
 import calculateBishopMoves from "./pieceMovements/bishopMoveCalculator";
 import calculatePawnMoves from "./pieceMovements/pawnMoveCalculator";
 import { checkWhatGetsPlayerInCheck } from "./CheckCalculator";
+import { determineMate } from "./MateCalculator";
+import { determineDraw } from "./DrawCalculator";
 import {
   pieceColor,
   findKings,
@@ -14,74 +16,125 @@ import {
   calculatePossibleMoves,
 } from "../utils";
 const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
-  const [gameRepresentation, setGameRepresentation] = useState([
-    ["r", "n", "b", "q", "k", "b", "n", "r"],
-    ["p", "q", "p", "p", "p", "p", "p", "p"],
-    ["", "", "", "", "", "", "", ""],
-    ["K", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["", "", "", " ", "", "", "", ""],
-    ["P", "P", "P", "P", "P", "P", "P", "P"],
-    ["R", "N", "B", "Q", "", "B", "N", "R"],
-  ]);
-  const [enPassantPlayed, setEnpassantPlayed] = useState(false);
-  const [playerCastled, setPlayerCastled] = useState(false);
+    const [gameRepresentation, setGameRepresentation] = useState([
+      // ["r", "n", "b", "q", "k", "b", "n", "r"],
+      // ["p", "q", "p", "p", "p", "p", "p", "p"],
+      // ["", "", "", "", "", "", "", ""],
+      // ["", "", "", "", "", "", "", ""],
+      // ["", "", "", "", "", "", "", ""],
+      // ["", "", "", "", "", "", "", ""],
+      // ["P", "P", "P", "P", "P", "P", "P", "P"],
+      // ["R", "N", "B", "Q", "K", "B", "N", "R"],
+      ["", "", "", "", "", "", "", ""],
+      ["q1", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["k1", "p1", "", "Q1", "", "", "", ""],
+      ["", "", "", "", "", "", "", "Rl1"],
+      ["", "", "", "", "K1", "", "", "Rr2"],
+    ]);
+    const [enPassantPlayed, setEnpassantPlayed] = useState(false);
+    const [playerCastled, setPlayerCastled] = useState(false);
+    // const [movedRooks, setMovedRooks] = useState({white:{left:false, right:false},black: {left:false, right:false}})
+    const [inCheck, setInCheck] = useState(false);
+    const [illegalMoves, setIllegalMoves] = useState(false);
 
-  const [selectedCell, setSelectedCell] = useState({
-    id: null,
-    piece: null,
-    currentPlayer: currentPlayer,
-  });
+    const [selectedCell, setSelectedCell] = useState({
+      id: null,
+      piece: null,
+      currentPlayer: currentPlayer,
+    });
 
-  const [capturedPieces, setCapturedPieces] = useState([]);
-  const [possibleMoves, setPossibleMoves] = useState([]);
-  const [whoIsChecked, setWhoIsChecked] = useState({
-    white: false,
-    black: false,
-  });
-  const [gameHistory, setGameHistory] = useState([]);
-  const lastTurn = gameHistory[gameHistory.length - 1];
+    const [movedPieces, setMovedPieces] = useState({});
+    const [capturedPieces, setCapturedPieces] = useState([]);
+    const [possibleMoves, setPossibleMoves] = useState([]);
+    const [gameHistory, setGameHistory] = useState([]);
+    const lastTurn = gameHistory[gameHistory.length - 1];
+
+  const initializeMovedPieces = () => {
+    const pieces = gameRepresentation.flat().filter((piece) => piece !== "");
+    const newMovedPieces = {};
+
+    pieces.forEach((piece) => {
+      newMovedPieces[piece] = false;
+    });
+
+    setMovedPieces(newMovedPieces);
+  };
+    useEffect(() => {
+      initializeMovedPieces();
+    }, []);
 
   const processGameMove = (clickPos, piece) => {
-    console.log(clickPos, piece);
-
+   
     // Player deselcted piece
     if (selectedCell.id === clickPos) {
       setSelectedCell((prevstate) => ({ ...prevstate, id: null, piece: null }));
       setPossibleMoves([]);
       return;
     }
-    console.log(selectedCell.id !== null && possibleMoves.includes(clickPos));
+
     // Check if it's the second click on a valid move
     if (selectedCell.id !== null && possibleMoves.includes(clickPos)) {
       processMovement(selectedCell.id, clickPos, selectedCell.piece, piece);
       // Unselect the piece
       setSelectedCell((prevstate) => ({ ...prevstate, id: null, piece: null }));
       setPossibleMoves([]);
+
       return; // Do nothing
     }
 
+    //check if players piece was selected
     const pieceColor = piece.toLowerCase() === piece ? "black" : "white";
     if (pieceColor !== currentPlayer) return;
 
-    // const kingsPositions = findKings(gameRepresentation);
-    // const kingInCheck = checkKingsInCheck(kingsPositions, gameRepresentation, currentPlayer, gameHistory)
-    // console.log(kingInCheck)
     processPieceSelection(clickPos, piece, currentPlayer);
-    /////// checkWhatGetsPlayerInCheck(gameRepresentation,currentPlayer,gameHistory )
-    
-    // if (kingInCheck) {
-    // console.log(kingInCheck)
-    // let isAnyMovePossible = checkIfAnyMovePossible(currentPlayer, currentPlayer==="white"? kingsPositions.black:kingsPositions.white  );
-    // if (!isAnyMovePossible) {
-    //   alert('MATE!');
-    // } else {console.log("only check")}
-    // }
+ 
+    const forbiddenMovement = checkWhatGetsPlayerInCheck(
+      gameRepresentation,
+      currentPlayer,
+      gameHistory,
+      movedPieces,
+      inCheck
+    );
+    setIllegalMoves(forbiddenMovement);
+
+    // Find the selected piece in the movedPieces array and set its value to true
+    console.log("moved piece is: ", piece);
+    setMovedPieces((prevState) => ({
+      ...prevState,
+      [piece]: true,
+    }));
+
+  //   console.log("Moved Pieces: ", movedPieces);
+console.log(forbiddenMovement)
+    if (forbiddenMovement.includes("king stands in check now")) {
+      setInCheck((prevCheck)  => {prevCheck =true ;  console.log(prevCheck)});
+      const canEscape = determineMate(
+        gameRepresentation,
+        currentPlayer,
+        gameHistory,
+        movedPieces,
+        inCheck
+      );
+      console.log("canEscape: ", canEscape);
+    } else {
+      setInCheck(false);
+      const isDraw = determineDraw(
+        gameRepresentation,
+        currentPlayer,
+        gameHistory,
+        movedPieces,
+        inCheck
+      );
+      console.log("can he move something? ", isDraw);
+    }
   };
 
   const processMovement = (selectedId, id, selectedPiece, piece) => {
     let capturedPiece = gameRepresentation[Math.floor(id / 8)][id % 8];
-    console.log(selectedId, id, selectedPiece, piece);
+    // console.log(selectedId, id, selectedPiece, piece);
     setGameRepresentation((prevGameRepresentation) => {
       const updatedGameRepresentation = [...prevGameRepresentation];
       updatedGameRepresentation[Math.floor(selectedId / 8)][selectedId % 8] =
@@ -152,126 +205,14 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
       id,
       piece,
       gameRepresentation,
-      gameHistory
+      gameHistory,
+      movedPieces,
+      inCheck
     );
     setPossibleMoves(moves);
   };
 
-  // const isKingInCheck = (kingPosition, kingColor, gameRepresentation) => {
-  //   const opponentColor = kingColor === "white" ? "black" : "white";
-  //   const flattenedRepresentation = Array.isArray(gameRepresentation)
-  //     ? gameRepresentation.flat()
-  //     : gameRepresentation;
-
-  //   for (let index = 0; index < flattenedRepresentation.length; index++) {
-  //     const piece = flattenedRepresentation[index];
-
-  //     if (piece === "") continue;
-
-  //     if (pieceColor(piece) === opponentColor) {
-  //       const piecePosition = index;
-  //       const pieceMoves = calculatePossibleMoves(
-  //         piecePosition,
-  //         piece,
-  //         gameRepresentation,
-  //         gameHistory
-  //       );
-  //       console.log(index, pieceMoves);
-  //       if (pieceMoves.includes(kingPosition)) {
-  //         return true;
-  //       }
-  //     }
-  //   }
-
-  //   return false;
-  // };
-
-  // const checkIfAnyMovePossible = (kingColor, kingPosition) => {
-  //   const opponentColor = kingColor === "white" ? "black" : "white";
-  //   console.log(isKingInCheck(kingPosition, opponentColor, gameRepresentation));
-  //   const playerPieces = gameRepresentation
-  //     .flat()
-  //     .filter((piece) => pieceColor(piece) === kingColor);
-  //   console.log(playerPieces);
-  //   // Iterate through all player's pieces and check their potential moves
-  //   for (let i = 0; i < playerPieces.length; i++) {
-  //     const playerPiecePosition = gameRepresentation
-  //       .flat()
-  //       .findIndex((piece) => piece === playerPieces[i]);
-  //     const playerPiecePotentialMoves = calculatePossibleMoves(
-  //       playerPiecePosition,
-  //       playerPieces[i],
-  //       gameRepresentation
-  //     );
-  //     console.log(playerPiecePotentialMoves);
-  //     // Iterate through all potential moves of the player's piece
-  //     for (let j = 0; j < playerPiecePotentialMoves.length; j++) {
-  //       const potentialMove = playerPiecePotentialMoves[j];
-  //       const clonedGameRepresentation = JSON.parse(
-  //         JSON.stringify(gameRepresentation)
-  //       );
-
-  //       // Simulate the potential move
-  //       clonedGameRepresentation[Math.floor(potentialMove / 8)][
-  //         potentialMove % 8
-  //       ] = playerPieces[i];
-  //       clonedGameRepresentation[Math.floor(playerPiecePosition / 8)][
-  //         playerPiecePosition % 8
-  //       ] = "";
-  //       clonedGameRepresentation[0][5] = "";
-  //       console.log(clonedGameRepresentation);
-
-  //       // Check if the move makes the king move out of check
-
-  //       const newKingPosition =
-  //         kingPosition === playerPiecePosition ? potentialMove : kingPosition;
-  //       if (
-  //         !isKingInCheck(
-  //           newKingPosition,
-  //           opponentColor,
-  //           clonedGameRepresentation
-  //         )
-  //       ) {
-  //         return true; // At least one move is possible
-  //       }
-  //     }
-  //   }
-
-  //   return false; // No move is possible
-  // };
-
-  // const checkKingInCheck = (
-  //   kingsPosition,
-  //   gameRepresentation,
-  //   player,
-  //   gameHistory
-  // ) => {
-  //   //  console.log(kingsPositions)
-  //   const kingInCheck = isKingInCheck(
-  //     kingsPosition.white,
-  //     player,
-  //     gameRepresentation,
-  //     gameHistory
-  //   );
-  //   // const isBlackKingInCheck = isKingInCheck(kingsPositions.black, 'black',gameRepresentation);
-  //   // console.log(isWhiteKingInCheck,isBlackKingInCheck)
-  //   // setWhoIsChecked({white: isWhiteKingInCheck, black: isBlackKingInCheck })
-  //   return kingInCheck;
-  // };
-
-  // const simulateMove = (gameRepresentation, from, to, piece, player) => {
-  //   const clonedGameRepresentation = JSON.parse(
-  //     JSON.stringify(gameRepresentation.flat())
-  //   );
-  //   clonedGameRepresentation[to] = piece;
-  //   clonedGameRepresentation[from] = "";
-  //   const lookedForKing = player === "black" ? "k" : "K";
-  //   const kingPosition = clonedGameRepresentation.find(
-  //     (piece) => piece == lookedForKing
-  //   );
-  //   return checkKingInCheck(kingPosition, clonedGameRepresentation);
-  // };
-
+ 
   return (
     <div className="game-screen">
       <div id="table">
@@ -302,8 +243,7 @@ const Board = ({ height, width, currentPlayer, setCurrentPlayer }) => {
         <p>Current Player: {selectedCell.currentPlayer}</p>
         <p>Cur: player: {currentPlayer}</p>
         <p> capturedPiece: {capturedPieces}</p>
-        <p> W: {whoIsChecked.white ? "true" : "false"} </p>
-        <p> B: {whoIsChecked.black ? "true" : "false"}</p>
+        <p> playerInCheck?: {inCheck === true ? "true" : "false"}</p>
         <div>
           {gameHistory.map((move, index) => (
             <div className="game-history-move" key={index}>

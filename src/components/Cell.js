@@ -18,8 +18,9 @@ const Cell = (props) => {
         className={`cell ${isGray ? 'gray-cell' : ''} ${isSelected ? 'selected-cell' : ''}`}
         onClick={() => onClick(id, piece)}
       >
+         {id}
         {piece && <span className={`piece ${piece}`}>{piece}</span>}
-        {id}
+        
       </div>
     );
   };

@@ -1,69 +1,99 @@
-import { pieceColor, calculatePossibleMoves } from "../utils";
+import { pieceColor, calculatePossibleMoves, findKings} from "../utils";
 
-export const checkWhatGetsPlayerInCheck = (curBoard, player, gameHistory) => {
+let movedPieces = {}
+export const checkWhatGetsPlayerInCheck = (curBoard, player, gameHistory,movedPiecesProp,inCheck) => {
+  // console.trace(movedPieces)
   // create an array of all the positions of the piece of player
-  JSON.parse(JSON.stringify(curBoard));
+  let illegalMoves = []
+  movedPieces = movedPiecesProp
   const playerPieces = getPlayerPieces(curBoard, player);
-
-  // for each of them calculate where they wouly be able to move
+ 
+  // for each of them calculate where they would be able to move
   for (let i = 0; i < playerPieces.length; i++) {
     const { piece, pieceIndex } = playerPieces[i];
-    const pieceMoves = calculatePossibleMoves(pieceIndex, piece, curBoard, gameHistory);
-
+    const pieceMoves = calculatePossibleMoves(
+      pieceIndex,
+      piece,
+      curBoard,
+      gameHistory,
+      movedPieces,
+      inCheck
+    );
+   
     for (let j = 0; j < pieceMoves.length; j++) {
       const potentialMove = pieceMoves[j];
-      const clonedGameRep = JSON.parse(JSON.stringify(curBoard));
-      clonedGameRep[Math.floor(potentialMove / 8)][potentialMove % 8] = piece;
-      clonedGameRep[Math.floor(pieceIndex / 8)][pieceIndex % 8] = '';
+      
+      let dummyBoard = JSON.parse(JSON.stringify(curBoard)); // Reset dummyBoard to the original board state
 
-      if (isKingInCheck(pieceIndex, pieceColor, curBoard, gameHistory)) {
-        console.log(`Move ${piece} from ${pieceIndex} to ${potentialMove} results in check.`);
+      dummyBoard[Math.floor(potentialMove / 8)][potentialMove % 8] = piece;
+      dummyBoard[Math.floor(pieceIndex / 8)][pieceIndex % 8] = "";
+      const playerPieces = getPlayerPieces(dummyBoard, player);
+      const newKingPos = findKings(dummyBoard)[player]
+    
+    const howIsKingAttacked = isKingInCheck(newKingPos, player, dummyBoard, gameHistory,movedPieces,inCheck)
+    // console.log(howIsKingAttacked?.enemy)
+      if ( howIsKingAttacked) {
+        // console.log(
+        //   `Move ${potentialMove   }  ${ pieceIndex}${ piece}  ${howIsKingAttacked.enemy}   results in check.`  
+        // );
+        illegalMoves.push({piece, move:potentialMove })
+                // console.log(dummyBoard)
       }
     }
   }
-  console.log(playerPieces);
-};
+  const kingPos = findKings(curBoard)[player]
+//   console.log(kingPos)
+// check if current position is also a check
+  if (isKingInCheck(kingPos, player, curBoard, gameHistory, movedPieces, inCheck)){
+    illegalMoves.push("king stands in check now")
+  }
 
+  return illegalMoves
+};
 // for each of them calculate where they wouly be able to move
 
 // calculate wheter that moce gets the player in check
 
 //return an array with the player pieces, each of them containing its position, mossible moves
+function getPlayerPieces(board, player) {
+  const flatBoard = board.flat();
+  const whitePiecesPositions = [];
+  const blackPiecesPositions = [];
+  for (let i = 0; i < flatBoard.length; i++) {
+    const piece = flatBoard[i];
 
-const getPlayerPieces = (curBoard, player) => {
-    curBoard = curBoard.flat();
-  let playerPieces = [];
-
-  for (let i = 0; i < curBoard.length; i++) {
-    const piece = curBoard[i];
-    if (piece == ""){continue}
-    console.log(piece)
-    const pieceColor = piece.toLowerCase() === piece ? "black" : "white"
-    console.log(piece, pieceColor, player);
-    const isPlayerPiece = player === pieceColor;
-  
-    if (isPlayerPiece) {
-      playerPieces.push({
-        piece,
-        pieceIndex: i,
-      });
+    if (piece !== "") {
+      if (piece === piece.toLowerCase()) {
+        blackPiecesPositions.push({
+          piece,
+          pieceIndex: i,
+        });
+      } else {
+        whitePiecesPositions.push({
+            piece,
+            pieceIndex: i,
+          });
+      }
     }
   }
-  return playerPieces;
-};
+  return player === "black" ? blackPiecesPositions : whitePiecesPositions;
+} // funguje správně
+ 
 
 const checkIfAnyMovePossible = (
   kingColor,
   kingPosition,
   gameRepresentation,
-  gameHistory
+  gameHistory,
+  inCheck
+  
 ) => {
   const opponentColor = kingColor === "white" ? "black" : "white";
-  console.log(isKingInCheck(kingPosition, opponentColor, gameRepresentation));
+   
   const playerPieces = gameRepresentation
     .flat()
     .filter((piece) => pieceColor(piece) === kingColor);
-  console.log(playerPieces);
+ 
   // Iterate through all player's pieces and check their potential moves
   for (let i = 0; i < playerPieces.length; i++) {
     const playerPiecePosition = gameRepresentation
@@ -73,9 +103,10 @@ const checkIfAnyMovePossible = (
       playerPiecePosition,
       playerPieces[i],
       gameRepresentation,
-      gameHistory
+      gameHistory,
+      movedPieces
     );
-    console.log(playerPiecePotentialMoves);
+    // console.log(playerPiecePotentialMoves);
     // Iterate through all potential moves of the player's piece
     for (let j = 0; j < playerPiecePotentialMoves.length; j++) {
       const potentialMove = playerPiecePotentialMoves[j];
@@ -91,14 +122,14 @@ const checkIfAnyMovePossible = (
         playerPiecePosition % 8
       ] = "";
       clonedGameRepresentation[0][5] = "";
-      console.log(clonedGameRepresentation);
+      //   console.log(clonedGameRepresentation);
 
       // Check if the move makes the king move out of check
 
       const newKingPosition =
         kingPosition === playerPiecePosition ? potentialMove : kingPosition;
       if (
-        !isKingInCheck(newKingPosition, opponentColor, clonedGameRepresentation)
+        !isKingInCheck(newKingPosition, opponentColor, clonedGameRepresentation,movedPieces,inCheck)
       ) {
         return true; // At least one move is possible
       }
@@ -108,50 +139,60 @@ const checkIfAnyMovePossible = (
   return false; // No move is possible
 };
 
-const isKingInCheck = (kingPosition, kingColor, gameRepresentation,gameHistory) => {
+export const isKingInCheck = (
+  kingPosition,
+  kingColor,
+  gameRepresentation,
+  gameHistory,
+  movedPieces,
+  inCheck
+) => {
+ 
   const opponentColor = kingColor === "white" ? "black" : "white";
-  const flattenedRepresentation = Array.isArray(gameRepresentation)
-    ? gameRepresentation.flat()
-    : gameRepresentation;
-
-  for (let index = 0; index < flattenedRepresentation.length; index++) {
-    const piece = flattenedRepresentation[index];
-
-    if (piece === "") continue;
-
-    if (pieceColor(piece) === opponentColor) {
-      const piecePosition = index;
-      const pieceMoves = calculatePossibleMoves(
-        piecePosition,
-        piece,
-        gameRepresentation,
-        gameHistory
+  const flattenedRepresentation =  gameRepresentation.flat();
+  const enemyPieces = getPlayerPieces(flattenedRepresentation, opponentColor);
+ 
+ for(let enemy in enemyPieces){
+    
+    const pieceMoves = calculatePossibleMoves(
+        enemyPieces[enemy].pieceIndex,
+        enemyPieces[enemy].piece,
+        flattenedRepresentation,
+        gameHistory,
+        movedPieces,
+        inCheck
       );
-      console.log(index, pieceMoves);
+//    console.log(enemyPieces[enemy],pieceMoves, pieceMoves.includes(kingPosition), kingPosition,opponentColor)
+ 
       if (pieceMoves.includes(kingPosition)) {
-        return true;
+        // console.log(pieceMoves,  enemyPieces[enemy])
+        return {enemy: enemyPieces[enemy].piece, pieceMoves};
       }
-    }
-  }
+
+ }
+ 
+ 
+//   for (let index = 0; index < flattenedRepresentation.length; index++) {
+//     const piece = flattenedRepresentation[index];
+
+//     if (piece === "") continue;
+
+//     if (pieceColor(piece) === opponentColor) {
+//       const piecePosition = index;
+//       const pieceMoves = calculatePossibleMoves(
+//         piecePosition,
+//         piece,
+//         gameRepresentation,
+//         gameHistory
+//       );
+//       //   console.log(index, pieceMoves);
+//       if (pieceMoves.includes(kingPosition)) {
+//         return true;
+//       }
+//     }
+//   }
 
   return false;
 };
 
-//   const checkKingInCheck = (
-//     kingsPosition,
-//     gameRepresentation,
-//     player,
-//     gameHistory
-//   ) => {
-//     //  console.log(kingsPositions)
-//     const kingInCheck = isKingInCheck(
-//       kingsPosition.white,
-//       player,
-//       gameRepresentation,
-//       gameHistory
-//     );
-//     // const isBlackKingInCheck = isKingInCheck(kingsPositions.black, 'black',gameRepresentation);
-//     // console.log(isWhiteKingInCheck,isBlackKingInCheck)
-//     // setWhoIsChecked({white: isWhiteKingInCheck, black: isBlackKingInCheck })
-//     return kingInCheck;
-//   };
+ 

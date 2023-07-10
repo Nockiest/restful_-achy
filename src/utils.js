@@ -8,8 +8,12 @@ import calculatePawnMoves from "./components/pieceMovements/pawnMoveCalculator";
 
 
 export const pieceColor = (piece) => {
-    return piece.toLowerCase() === piece ? 'black' : 'white';
-  };
+  if (piece === '') {
+    return null;
+  }
+  
+  return piece.toLowerCase() === piece ? 'black' : 'white';
+};
 
   export const findKings = (gameRepresentation) => {
     let gameFlat = gameRepresentation.flat()
@@ -47,32 +51,30 @@ export const pieceColor = (piece) => {
     // return capturedPiecePos
   return false
   };
-
-  export const calculatePossibleMoves = (id, piece, gameRep, gameHistory) => {
+  export const calculatePossibleMoves = (position, piece, gameRep, gameHistory,movedPieces,inCheck) => {
      
-    const position = gameRep
-      .flat()
-      .findIndex((cellPiece, index) => index === id && cellPiece === piece);
-    const pieceColor = piece.toLowerCase() === piece ? "black" : "white";
-    const lastTurn = gameHistory[gameHistory?.length - 1] || null;
-
-    if (piece.toLowerCase() === "r") {
-      return calculateRookMoves(id, pieceColor, gameRep.flat());
-    } else if (piece.toLowerCase() === "n") {
-      return calculateKnightMoves(id, pieceColor, gameRep.flat());
-    } else if (piece.toLowerCase() === "k") {
-      return calculateKingMoves(id, pieceColor, gameRep.flat());
-    } else if (piece.toLowerCase() === "q") {
-      return calculateQueenMoves(id, pieceColor, gameRep.flat());
-    } else if (piece.toLowerCase() === "b") {
-      return calculateBishopMoves(id, pieceColor, gameRep.flat());
-    } else if (piece.toLowerCase() === "p") {
-      return calculatePawnMoves(id, pieceColor, gameRep.flat(), lastTurn);
+    const pieceColor = piece.charAt(0).toLowerCase() === piece.charAt(0) ? 'black' : 'white';
+    const lastTurn = gameHistory?.[gameHistory.length - 1] || null;
+    const firstLetter = piece.charAt(0).toLowerCase();
+    // const isCheckLocal = inCheck || false
+    
+    switch (firstLetter) {
+      case 'r':
+        return calculateRookMoves(position, pieceColor, gameRep.flat(), gameHistory, movedPieces);
+      case 'n':
+        return calculateKnightMoves(position, pieceColor, gameRep.flat(), gameHistory, movedPieces);
+      case 'k':
+        return calculateKingMoves(position, pieceColor, gameRep.flat(), gameHistory, movedPieces,inCheck);
+      case 'q':
+        return calculateQueenMoves(position, pieceColor, gameRep.flat(), gameHistory, movedPieces);
+      case 'b':
+        return calculateBishopMoves(position, pieceColor, gameRep.flat(), gameHistory, movedPieces);
+      case 'p':
+        return calculatePawnMoves(position, pieceColor, gameRep.flat(), lastTurn);
+      default:
+        return [];
     }
-
-    return [];
   };
-  
  // const simulateMove = (gameRepresentation, from, to, piece, player) => {
   //   const clonedGameRepresentation = JSON.parse(
   //     JSON.stringify(gameRepresentation.flat())
