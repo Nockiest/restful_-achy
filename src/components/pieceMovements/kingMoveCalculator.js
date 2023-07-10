@@ -31,9 +31,10 @@ function calculateKingMoves(position, color, board, gameHistory, movedPieces,inC
         }
       }
     }
-
-    possibleMoves.push(tryCastle(board, color, "kingside", gameHistory,movedPieces,inCheck)) 
-    possibleMoves.push(tryCastle(board, color, "queenside", gameHistory, movedPieces,inCheck)) 
+  const canCastleLeft = tryCastle(board, color, "kingside", gameHistory,movedPieces,inCheck)
+  const canCastleRight = tryCastle(board, color, "queenside", gameHistory, movedPieces,inCheck)
+   canCastleLeft && possibleMoves.push( canCastleLeft) 
+   canCastleRight && possibleMoves.push( canCastleRight) 
   
     return possibleMoves;
   }

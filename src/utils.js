@@ -36,21 +36,22 @@ export const findKings = (gameRepresentation) => {
 
   export function checkEnPassantWasPlayed( playerColor, lastTurn, thisTurn){
     // console.log(thisTurn)
-    // if(!lastTurn){return}
+    if(!lastTurn){return  false}
     // console.log("D")
-    // if(lastTurn.piece.toLowerCase() !== "p"){return}
-    // console.log("D")
-    // if (lastTurn.captured !== ""){ return }
+    if(lastTurn.piece.toLowerCase() !== "p"){return false}
+    console.log("D")
+    if (lastTurn.captured !== ""){ return false }
     // console.log("D", Math.abs(lastTurn.from - lastTurn.to))
-    // if(Math.abs(lastTurn.from - lastTurn.to) !== 16){return}
+    if(Math.abs(lastTurn.from - lastTurn.to) !== 16){return false}
     // console.log("D")
-    // if(Math.abs(thisTurn.from - thisTurn.to) !== 9 && Math.abs(thisTurn.from - thisTurn.to) !== 7 ) {return }
-    // console.log("D5")
-    // if(thisTurn.piece.toLowerCase() !== "p"){return}
-    // let capturedPiecePos = playerColor === "white" ? lastTurn.from + 16 : lastTurn.from -16
-    // console.log("ENPASSANR CAPTURED PUECE IS " + capturedPiecePos)
-    // return capturedPiecePos
-  return false
+    if(Math.abs(thisTurn.from - thisTurn.to) !== 9 && Math.abs(thisTurn.from - thisTurn.to) !== 7 ) {return false }
+    // console.log("D5", thisTurn.piece.toLowerCase())
+    if(thisTurn.piece.toLowerCase() !== "p"){return false}
+   // console.log("passed")
+    let capturedPiecePos = playerColor === "white" ? lastTurn.from + 16 : lastTurn.from -16
+    console.log("ENPASSANR CAPTURED PUECE IS " + capturedPiecePos)
+    return capturedPiecePos
+  
   };
   export const calculatePossibleMoves = (position, piece, gameRep, gameHistory,movedPieces,inCheck) => {
      
@@ -71,7 +72,7 @@ export const findKings = (gameRepresentation) => {
       case 'b':
         return calculateBishopMoves(position, pieceColor, gameRep.flat(), gameHistory, movedPieces);
       case 'p':
-        return calculatePawnMoves(position, pieceColor, gameRep.flat(), lastTurn);
+        return calculatePawnMoves(position, pieceColor, gameRep.flat(), lastTurn, movedPieces);
       default:
         return [];
     }

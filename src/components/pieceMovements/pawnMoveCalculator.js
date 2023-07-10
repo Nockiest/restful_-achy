@@ -1,5 +1,7 @@
+import { pieceColor } from "../../utils";
+
 const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
-  
+  console.log(position, pieceColor, board, lastTurn)
   const row = Math.floor(position / 8);
   const col = position % 8;
   const possibleMoves = [];
@@ -36,9 +38,9 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
   }
 
   // En passant calculation
-  const enPassantLeft = pieceColor === "white" ? position - 9 : position + 9;
+  const enPassantLeft = pieceColor === "white" ? position - 9 : position + 7;
   const enPassantLeftCapture = pieceColor === "white" ? position - 1 : position + 1;
-  const enPassantRight = pieceColor === "white" ? position - 7 : position + 7;
+  const enPassantRight = pieceColor === "white" ? position - 7 : position + 9;
   const enPassantRightCapture = pieceColor === "white" ? position + 1 : position - 1;
   if (isEnPassantPossible(enPassantLeft, enPassantLeftCapture, pieceColor, board, lastTurn)) {
     possibleMoves.push(enPassantLeft);
@@ -76,7 +78,8 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
     
     return false;
   };
-  const isEnPassantPossible = (enPassantTo, enPassantCapture, pieceColor, board, lastTurn) => {
+  const isEnPassantPossible = (enPassantTo, enPassantCapture, playerColor, board, lastTurn) => {
+    console.log(enPassantTo, enPassantCapture, playerColor, board, lastTurn)
     if (enPassantTo >= 0 && enPassantTo < 64 && lastTurn) {
       
       const piece = board[enPassantTo];
@@ -85,17 +88,17 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
       const lastTo = lastTurn.to;
       const attackedPiecColor = piece.toLowerCase() === piece ? 'black' : 'white';
       // console.log(piece === "", attackedPiecColor, pieceColor)
-      if (piece === "" && attackedPiecColor !== pieceColor, board[enPassantCapture]) {
-        // console.log( lastFrom , enPassantTo +8, enPassantCapture )
-        // console.log(lastPiece === "p" ,pieceColor === "white" ,lastFrom === enPassantTo + 8 ,lastTo === enPassantCapture  )
-        // console.log(lastPiece === "P" ,pieceColor === "black" , lastFrom === enPassantTo - 8,lastTo === enPassantCapture )
-        if (lastPiece === "P" && pieceColor === "black" && lastFrom === enPassantTo + 8 && lastTo === enPassantCapture  ) {
-          // En passant is possible for black pawn moving 2 squares forward
+      if (piece === "" && attackedPiecColor !== playerColor, board[enPassantCapture]) {
+      //    console.log( lastFrom , enPassantTo +8, enPassantCapture )
+      //   console.log(lastPiece === "p" ,playerColor === "white" ,lastFrom === enPassantTo + 8 ,lastTo === enPassantCapture  )
+      //   console.log(lastPiece === "P" ,playerColor === "black" , lastFrom === enPassantTo - 8,lastTo === enPassantCapture )
+      // console.log(pieceColor)
+        // console.log(pieceColor(lastPiece) === playerColor)
+        if (pieceColor(lastPiece)!== playerColor && Math.abs(lastFrom - enPassantTo)===  8 && lastTo === enPassantCapture  ) {
+          
           return true;
-        } else if (lastPiece === "p" && pieceColor === "white" && lastFrom === enPassantTo - 8 && lastTo === enPassantCapture  ) {
-          // En passant is possible for white pawn moving 2 squares forward
-          return true;
-        }
+        } 
+   
       }
     }
   
