@@ -1,7 +1,7 @@
 import { pieceColor } from "../../utils";
 
 const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
-  console.log(position, pieceColor, board, lastTurn)
+  
   const row = Math.floor(position / 8);
   const col = position % 8;
   const possibleMoves = [];
@@ -79,7 +79,7 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
     return false;
   };
   const isEnPassantPossible = (enPassantTo, enPassantCapture, playerColor, board, lastTurn) => {
-    console.log(enPassantTo, enPassantCapture, playerColor, board, lastTurn)
+    // console.log(enPassantTo, enPassantCapture, playerColor, board, lastTurn)
     if (enPassantTo >= 0 && enPassantTo < 64 && lastTurn) {
       
       const piece = board[enPassantTo];

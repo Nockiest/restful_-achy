@@ -98,6 +98,8 @@ export const findKings = (gameRepresentation) => {
     
     return gameRepresentation;
   };
+
+  //  
  // const simulateMove = (gameRepresentation, from, to, piece, player) => {
   //   const clonedGameRepresentation = JSON.parse(
   //     JSON.stringify(gameRepresentation.flat())

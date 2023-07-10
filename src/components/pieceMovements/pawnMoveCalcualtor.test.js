@@ -21,7 +21,7 @@ describe('calculatePawnMoves', () => {
       const expectedMoves = [22, 23]; // Expected list of possible moves for en passant position
 
       const result = calculatePawnMoves(position, pieceColor, board, lastTurn);
-      console.log(result)
+      
       expect(result).toEqual(expectedMoves);
     });
   });
