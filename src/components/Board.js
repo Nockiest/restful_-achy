@@ -10,9 +10,10 @@ import { checkWhatGetsPlayerInCheck } from "./CheckCalculator";
 import { pawnReachedBackRank, EvolvePawnPanel } from "./EvolvePawnHandler";
 import { determineMate } from "./MateCalculator";
 import { determineDraw } from "./DrawCalculator";
+import { useChannelStateContext, useChatContext } from "stream-chat-react";
 import { pieceColor, findKings, checkEnPassantWasPlayed, calculatePossibleMoves, findIfCastled } from "../utils";
 import InformationPanel from "./InformationPanel";
-const Board = ({ height, width, curPlayer, setCurPlayer }) => {
+const Board = ({ height, width }) => {
   const [gameRepresentation, setGameRepresentation] = useState([
     ["rl1", "n1", "b1", "q1", "k1", "b2", "n2", "rr2"],
     ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8"],
@@ -41,14 +42,18 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
     piece: null,
     curPlayer: null,
   });
+  const [curPlayer, setCurPlayer] = useState("white")
   const [movedPieces, setMovedPieces] = useState({});
   const [capturedPieces, setCapturedPieces] = useState([]);
   const [possibleMoves, setPossibleMoves] = useState([]);
   const [gameHistory, setGameHistory] = useState([]);
   const [pawnToEvolveIndex, setPawnToEvolveIndex] = useState(null);
   const [playedMoves, setPlayedMoves] = useState(0);
-  const [playerChangeCount, setplayerChangeCount] = useState(0);
+  // const [playerChangeCount, setplayerChangeCount] = useState(0);
   const lastTurn = gameHistory[gameHistory.length - 1];
+  const { channel} = useChannelStateContext()
+  const { client } = useChatContext();
+
 
   const initializeMovedPieces = () => {
     const pieces = gameRepresentation.flat().filter((piece) => piece !== "");
@@ -65,12 +70,12 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
     initializeMovedPieces();
   }, []);
 
-  const processGameMove = (clickPos, piece) => {
+  const processGameMove = async (clickPos, piece) => {
     // console.log(selectedCell,selectedCell.id === clickPos,selectedCell.id)
     //***   Player deselcted piece  by cclicking on a piece of the same color */
     if ( ( selectedCell.id !== null && pieceColor(piece) === curPlayer )) {
-      setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
-      setPossibleMoves([]);
+        setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
+        setPossibleMoves([]);
       return;
     }
 
@@ -79,9 +84,9 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
     if (selectedCell.id !== null && possibleMoves.includes(clickPos)   ) {
       processMovement(selectedCell.id, clickPos, selectedCell.piece, piece);
 
-      setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
-      setPossibleMoves([]);
-      setPlayedMoves((prevMoves) => prevMoves + 1);
+     await  setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
+      await setPossibleMoves([]);
+      await setPlayedMoves((prevMoves) => prevMoves + 1);
       return;
     }
 
@@ -93,10 +98,10 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
       inCheck
     );
 
-    setIllegalMoves(forbiddenMovement);
+    await setIllegalMoves(forbiddenMovement);
     console.log(forbiddenMovement);
     if (forbiddenMovement.includes("king stands in check now")) {
-      setInCheck((prevCheck) => {
+      await setInCheck((prevCheck) => {
         console.log("prevCheck:", prevCheck); // Updated value
         return true;
       });
@@ -104,7 +109,7 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
       const canEscape = determineMate(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
       console.log("canEscape: ", canEscape);
     } else {
-      setInCheck(false);
+      await setInCheck(false);
       const isDraw = determineDraw(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
       console.log("can he move something? ", isDraw);
     }
@@ -122,9 +127,12 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
 
      return { ...prevState, [piece]: true,}
      });
+    
   };
 
-  const processMovement = (selectedId, id, selectedPiece, piece) => {
+
+
+    const processMovement = async (selectedId, id, selectedPiece, piece,clickPos) => {
     let capturedPiece = gameRepresentation[Math.floor(id / 8)][id % 8];
     const moveDetails = {
       color: curPlayer,
@@ -145,6 +153,7 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
       updatedGameRepresentation[Math.floor(id / 8)][id % 8] = selectedPiece;
       return updatedGameRepresentation;
     });
+    console.log(capturedPiece)
     setCapturedPieces((prevPieces) => [...prevPieces, capturedPiece]);
 
     let capturedByEnPassant = checkEnPassantWasPlayed(curPlayer === "white" ? "white" : "black", lastTurn, moveDetails);
@@ -177,26 +186,24 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
         return updatedRepresentation;
       });
     }
+    const backRankPawnIndex = pawnReachedBackRank(gameRepresentation);
+    // console.log(backRankPawnIndex);
 
-    setTimeout(() => {
-      const backRankPawnIndex = pawnReachedBackRank(gameRepresentation);
-      // console.log(backRankPawnIndex);
-
-      if (backRankPawnIndex < 0) {
-        console.log("switching player");
-        setCurPlayer(curPlayer === "white" ? "black" : "white");
-      }
-      setPawnToEvolveIndex((prev) => {
-        prev = backRankPawnIndex;
-        // console.log(prev);
-        return prev;
-      });
-
-      setPossibleMoves([]);
-      setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
-    }, 100);
-
-    console.log(movedPieces);
+    if (backRankPawnIndex < 0) {
+      console.log("switching player");
+      await channel.sendEvent({
+        type: "game-move",
+        data: { gameHistory },
+      });//  setCurPlayer(curPlayer === "white" ? "black" : "white");
+    }
+    setPawnToEvolveIndex((prev) => {
+      prev = backRankPawnIndex;
+      // console.log(prev);
+      return prev;
+    });
+    
+    setPossibleMoves([]);
+    setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));   
   };
 
   const processPieceSelection = (id, piece, curPlayer, forbiddenMovement) => {
@@ -224,7 +231,66 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
     setPossibleMoves(filteredMoves);
   };
 
-  useEffect(() => {}, [gameRepresentation]);
+  channel.on(  (event) => {
+    // console.log("game-move was procured",event.user.id , client.userID)
+    if (event.type == "game-move"  ){
+ 
+      console.log("switchingPlayer")
+    
+       
+        setCurPlayer(curPlayer === "white" ? "black" : "white");
+    }
+    if (event.type == "game-move" && event.user.id !== client.userID) {
+       
+      console.log("hello3")
+      const { color, piece, from, to, gameHistory } = event.data.gameHistory;
+      console.log("hello2")
+      setGameRepresentation((prevGameRepresentation) => {
+        const updatedGameRepresentation = [...prevGameRepresentation];
+        const fromRow = Math.floor(from / 8);
+        const fromCol = from % 8;
+        const toRow = Math.floor(to / 8);
+        const toCol = to % 8;
+  
+        // Move the piece from the 'from' position to the 'to' position
+        updatedGameRepresentation[toRow][toCol] = piece;
+        updatedGameRepresentation[fromRow][fromCol] = "";
+  
+        // Handle captured piece if any
+        if (captured) {
+          // Update the captured piece in the opponent's board state
+          const capturedRow = Math.floor(captured / 8);
+          const capturedCol = captured % 8;
+          updatedGameRepresentation[capturedRow][capturedCol] = "";
+        }
+  
+        return updatedGameRepresentation;
+      });
+      console.log("hello1")
+      setGameHistory(
+        prevhistory =>{
+          console.log(prevHistory)
+          return [...prevHistory, gameHistory]
+        }
+   
+      )
+    }
+  });
+
+  // useEffect(() => {
+  //   // Create an async function to handle the effect
+  //   const sendGameHistory = async () => {
+      
+  //   };
+  
+  //   // Call the async function
+  //   sendGameHistory();
+  
+  //   // Return the cleanup function
+  //   return () => {
+     
+  //   };
+  // }, [curPlayer]);
   return (
     <div className="game-screen">
       <div id="table">
@@ -255,6 +321,7 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
           curPlayer={curPlayer}
           inCheck={inCheck}
           gameHistory={gameHistory}
+          capturedPieces={capturedPieces}
         />
       </div>
       <EvolvePawnPanel
@@ -266,6 +333,7 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
         movedPieces={movedPieces}
         setGameRepresentation={setGameRepresentation}
         setPawnToEvolveIndex={setPawnToEvolveIndex}
+        gameHistory={gameHistory}
       />
     </div>
   );

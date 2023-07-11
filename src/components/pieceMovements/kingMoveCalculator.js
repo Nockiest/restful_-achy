@@ -54,8 +54,8 @@ function calculateKingMoves(position, color, board, gameHistory, movedPieces,inC
   
     // Check if the king and rook meet the conditions for a valid castle move
     const cellsInBetween = getCellsInBetween(kingStartPosition, rookStartPosition, board)
-    console.log(cellsInBetween)
-    if(cellsInBetween === ['', '']|| cellsInBetween === ['', '', ""]){console.log("its falsa")}
+    console.log(cellsInBetween === ['', ''], cellsInBetween === ['', '', ""])
+    if(cellsInBetween === ['', '']|| cellsInBetween === ['', '', ""]){console.log("its false")}
     const fieldsBetweenEmpty = side === 'kingside'
       ? board[rookStartPosition - 1] === '' && board[rookStartPosition - 2] === ''
       : board[rookStartPosition + 1] === '' && board[rookStartPosition + 2] === '' && board[rookStartPosition + 3] === '';

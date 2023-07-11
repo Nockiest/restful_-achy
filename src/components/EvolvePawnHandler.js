@@ -1,3 +1,5 @@
+import { useChannelStateContext, useChatContext } from "stream-chat-react";
+
 export const EvolvePawnPanel = ({
   pawnToEvolveIndex,
   setMovedPieces,
@@ -6,8 +8,11 @@ export const EvolvePawnPanel = ({
   setGameRepresentation,
   curPlayer,
   setCurPlayer,
-  movedPieces
+  movedPieces,
+  gameHistory
 }) => {
+  const { channel} = useChannelStateContext()
+  const { client } = useChatContext();
   const evolvablePieces = ["n", "q", "r", "b"];
 
   const handlePieceSelection = (letter) => {
@@ -32,7 +37,7 @@ export const EvolvePawnPanel = ({
     if (backrankPawnIndex === -1) {
       // No pawns on the backrank, update the game representation and set the current player
       setGameRepresentation(updatedGameRepresentation);
-      setCurPlayer(curPlayer === "white" ? "black" : "white");
+      // setCurPlayer(curPlayer === "white" ? "black" : "white");
       setPawnToEvolveIndex(false);
       setMovedPieces((movedPieces) => {
         // console.log(movedPieces, "Before Update");
@@ -41,27 +46,27 @@ export const EvolvePawnPanel = ({
           [pieceType + (pieceCount + 1)]: true,
         };
       });
-      setTimeout(() => {
-        // console.log(movedPieces);
-      }, 1000);
+
+      // Handle the asynchronous logic here using promises or an async IIFE
+      channel
+        .sendEvent({
+          type: "game-move",
+          data: { gameHistory },
+        })
+        .then(() => {
+          // Handle the response or any additional logic after sending the event
+          // console.log("Event sent successfully");
+        })
+        .catch((error) => {
+          // Handle errors that occur during sending the event
+          console.error("Error sending event:", error);
+        });
     } else {
       console.log("There are still pawns on the backrank. Cannot switch player yet.");
     }
   };
-// console.log(pawnToEvolveIndex, typeof pawnToEvolveIndex == "number");
-  return (
-    <div className="evolve-pawn-panel">
-      {typeof pawnToEvolveIndex == "number" && pawnToEvolveIndex >= 0 && (
-        <div id="evolutionRectangle">
-          {evolvablePieces.map((letter) => (
-            <div key={letter} className="evolutionPiece" onClick={() => handlePieceSelection(letter)}>
-              {curPlayer === "white" ? letter.toUpperCase() : letter}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+
+  // Rest of the component code...
 };
 export const pawnReachedBackRank = (gameRepresentation) => {
   const backranks = { white: 0, black: 7 };
