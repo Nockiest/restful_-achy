@@ -5,7 +5,7 @@ const InformationPanel = ({selectedCell,curPlayer,capturedPieces,inCheck, gameHi
     <div>  
     <p>Selected Cell: {selectedCell.id}</p>
     <p>Selected Piece: {selectedCell.piece}</p>
-    <p>Current Player: {selectedCell.curPlayer}</p>  
+    <p>SelectedColor: {selectedCell.curPlayer}</p>  
     <p>Cur: player: {curPlayer}</p>
     <p> capturedPiece: {capturedPieces}</p>
     <p> playerInCheck?: {inCheck === true ? "true" : "false"}</p>
