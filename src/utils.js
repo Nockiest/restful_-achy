@@ -11,7 +11,7 @@ export const pieceColor = (piece) => {
   if (piece === '') {
     return null;
   }
-  
+  // console.log(piece,  piece.toLowerCase() === piece )
   return piece.toLowerCase() === piece ? 'black' : 'white';
 };
 
@@ -99,6 +99,16 @@ export const findKings = (gameRepresentation) => {
     return gameRepresentation;
   };
 
+  export const getCellsInBetween = (start, end, board) => {
+  let result = [];
+  let step = start <= end ? 1 : -1; // determine the direction to iterate
+  let smallerIndex = start <= end ? start : end
+  let higherIndex = start <= end ? end : start
+  for (let i =smallerIndex +1;  i < higherIndex; i ++) {
+    result.push(board[i]);
+  }// tahle finkce nepodporuje dummyBoard 
+  return result;
+};
   //  
  // const simulateMove = (gameRepresentation, from, to, piece, player) => {
   //   const clonedGameRepresentation = JSON.parse(

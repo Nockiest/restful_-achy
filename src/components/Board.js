@@ -11,18 +11,18 @@ import { pawnReachedBackRank, EvolvePawnPanel } from "./EvolvePawnHandler";
 import { determineMate } from "./MateCalculator";
 import { determineDraw } from "./DrawCalculator";
 import { pieceColor, findKings, checkEnPassantWasPlayed, calculatePossibleMoves, findIfCastled } from "../utils";
-import PieceSelector from "./PieceSelector";
 import InformationPanel from "./InformationPanel";
 const Board = ({ height, width, curPlayer, setCurPlayer }) => {
   const [gameRepresentation, setGameRepresentation] = useState([
-    ["", "", "", "", "K1", "", "", ""],
-    ["", "", "P2", "", "", "", "", "p1"],
+    ["rl1", "n1", "b1", "q1", "k1", "b2", "n2", "rr2"],
+    ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8"],
     ["", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "B1", "", ""],
     ["", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "P1", ""],
-    ["", "", "", "", "k1", "", "", ""],
+    ["", "", "", "", "", "", "", ""],
+    ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"],
+    ["Rl1", "N1", "B1", "Q1", "K1", "B2", "N2", "Rr2"],
+
     // ["rl1", "", "", "", "k1", "", "", "rr2"],
     // ["q1", "", "", "", "", "", "", ""],
     // ["", "", "", "", "", "", "", ""],
@@ -46,8 +46,8 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
   const [possibleMoves, setPossibleMoves] = useState([]);
   const [gameHistory, setGameHistory] = useState([]);
   const [pawnToEvolveIndex, setPawnToEvolveIndex] = useState(null);
-  const [playedMoves, setPlayedMoves] = useState(0)
-  const [playerChangeCount, setplayerChangeCount] = useState(0)
+  const [playedMoves, setPlayedMoves] = useState(0);
+  const [playerChangeCount, setplayerChangeCount] = useState(0);
   const lastTurn = gameHistory[gameHistory.length - 1];
 
   const initializeMovedPieces = () => {
@@ -55,7 +55,8 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
     const newMovedPieces = {};
 
     pieces.forEach((piece) => {
-      newMovedPieces[piece] = false;
+      console.log(piece === "");
+      return (newMovedPieces[piece] = false);
     });
 
     setMovedPieces(newMovedPieces);
@@ -65,32 +66,25 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
   }, []);
 
   const processGameMove = (clickPos, piece) => {
-  console.log(selectedCell,selectedCell.id === clickPos,selectedCell.id)
-    //***   Player deselcted piece  */
-    if (selectedCell.id === clickPos) {
-      setSelectedCell((prevstate) => ({  id: null, piece: null, curPlayer: null }));
+    // console.log(selectedCell,selectedCell.id === clickPos,selectedCell.id)
+    //***   Player deselcted piece  by cclicking on a piece of the same color */
+    if ( ( selectedCell.id !== null && pieceColor(piece) === curPlayer )) {
+      setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
       setPossibleMoves([]);
       return;
     }
 
+ 
     // ******* Check if it's the second click on a valid move
-    if (selectedCell.id !== null && possibleMoves.includes(clickPos)) {
+    if (selectedCell.id !== null && possibleMoves.includes(clickPos)   ) {
       processMovement(selectedCell.id, clickPos, selectedCell.piece, piece);
-     
-      setSelectedCell((prevstate) => ({  id: null, piece: null, curPlayer: null}));
+
+      setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
       setPossibleMoves([]);
-      setPlayedMoves(prevMoves => prevMoves + 1)
-      return;  
+      setPlayedMoves((prevMoves) => prevMoves + 1);
+      return;
     }
 
-    // ****** check if players piece was selected
-    const pieceColor = piece.toLowerCase() === piece ? "black" : "white";
-    if (pieceColor !== curPlayer) return;
-
-    // ******select the piece
-    processPieceSelection(clickPos, piece, curPlayer);
-
-    // find forbidden moves for the curPlayer
     const forbiddenMovement = checkWhatGetsPlayerInCheck(
       gameRepresentation,
       curPlayer,
@@ -98,15 +92,8 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
       movedPieces,
       inCheck
     );
+
     setIllegalMoves(forbiddenMovement);
-
-    // Find the selected piece in the movedPieces array and set its value to true
-    console.log("moved piece is: ", piece);
-    setMovedPieces((prevState) => ({
-      ...prevState,
-      [piece]: true,
-    }));
-
     console.log(forbiddenMovement);
     if (forbiddenMovement.includes("king stands in check now")) {
       setInCheck((prevCheck) => {
@@ -121,6 +108,20 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
       const isDraw = determineDraw(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
       console.log("can he move something? ", isDraw);
     }
+
+    // ****** check if players piece was selected
+    const selectedPieceColor = pieceColor(piece);  
+    if (selectedPieceColor !== curPlayer || selectedPieceColor === null) return console.log(selectedPieceColor);
+
+    // ******select the piece
+    processPieceSelection(clickPos, piece, curPlayer, forbiddenMovement);
+
+    // Find the selected piece in the movedPieces array and set its value to true
+    setMovedPieces((prevState) => {
+      console.log(piece);
+
+     return { ...prevState, [piece]: true,}
+     });
   };
 
   const processMovement = (selectedId, id, selectedPiece, piece) => {
@@ -135,7 +136,7 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
 
     const updatedGameHistory = [...gameHistory, moveDetails];
     setGameHistory(updatedGameHistory);
-    console.log(selectedId, id, selectedPiece, piece, selectedPiece.toLowerCase());
+    // console.log(selectedId, id, selectedPiece, piece, selectedPiece.toLowerCase());
 
     setGameRepresentation((prevGameRepresentation) => {
       let updatedGameRepresentation = [...prevGameRepresentation];
@@ -179,40 +180,51 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
 
     setTimeout(() => {
       const backRankPawnIndex = pawnReachedBackRank(gameRepresentation);
-    console.log(backRankPawnIndex);
-        
-    if(backRankPawnIndex < 0){
-      console.log("switching player")
-      setCurPlayer(curPlayer === "white" ? "black" : "white");
-    }
-    setPawnToEvolveIndex((prev) => {
-      prev = backRankPawnIndex;
-      console.log(prev);
-      return prev;
-    });
+      // console.log(backRankPawnIndex);
 
+      if (backRankPawnIndex < 0) {
+        console.log("switching player");
+        setCurPlayer(curPlayer === "white" ? "black" : "white");
+      }
+      setPawnToEvolveIndex((prev) => {
+        prev = backRankPawnIndex;
+        // console.log(prev);
+        return prev;
+      });
 
-    setPossibleMoves([]);
-    setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null}));
+      setPossibleMoves([]);
+      setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
     }, 100);
-    
-     
-  
+
+    console.log(movedPieces);
   };
 
-  const processPieceSelection = (id, piece, curPlayer) => {
-    console.log(id, piece, curPlayer)
+  const processPieceSelection = (id, piece, curPlayer, forbiddenMovement) => {
     setSelectedCell((prevstate) => ({
       ...prevstate,
       id,
       piece,
       curPlayer,
     }));
+
     const moves = calculatePossibleMoves(id, piece, gameRepresentation, gameHistory, movedPieces, inCheck);
-    setPossibleMoves(moves);
+
+    const filteredMoves = moves.filter((move) => {
+      const { piece: movePiece, move: movePosition } = move;
+      if (!illegalMoves) {
+        return move;
+      }
+      const illegalMove = forbiddenMovement?.find((illegal) => {
+        console.log(illegal, illegal.move, move, illegal.piece === piece, illegal.move === move);
+        return illegal.piece === piece && illegal.move === move;
+      });
+      return !illegalMove; // Exclude any move that matches an illegal move
+    });
+
+    setPossibleMoves(filteredMoves);
   };
 
- 
+  useEffect(() => {}, [gameRepresentation]);
   return (
     <div className="game-screen">
       <div id="table">
@@ -250,6 +262,8 @@ const Board = ({ height, width, curPlayer, setCurPlayer }) => {
         gameRepresentation={gameRepresentation}
         curPlayer={curPlayer}
         setCurPlayer={setCurPlayer}
+        setMovedPieces={setMovedPieces}
+        movedPieces={movedPieces}
         setGameRepresentation={setGameRepresentation}
         setPawnToEvolveIndex={setPawnToEvolveIndex}
       />

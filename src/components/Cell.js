@@ -16,6 +16,7 @@ const Cell = (props) => {
       <div
         style={cellStyle}
         className={`cell ${isGray ? 'gray-cell' : ''} ${isSelected ? 'selected-cell' : ''}`}
+        data-testid={`cell-${id}`}
         onClick={() => onClick(id, piece)}
       >
          {id}

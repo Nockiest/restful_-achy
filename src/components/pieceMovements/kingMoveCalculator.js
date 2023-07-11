@@ -1,5 +1,6 @@
 import { isKingInCheck } from "../CheckCalculator"; 
-import { pieceColor } from "../../utils";
+import { pieceColor, getCellsInBetween } from "../../utils";
+ 
 function calculateKingMoves(position, color, board, gameHistory, movedPieces,inCheck) {
     const row = Math.floor(position / 8);
     const col = position % 8;
@@ -49,28 +50,32 @@ function calculateKingMoves(position, color, board, gameHistory, movedPieces,inC
     const kingStartPosition = currentPlayer === 'white' ?  60 : 4  ;
     const kingFinalPosition = side === 'kingside' ? kingStartPosition + 2 : kingStartPosition - 2;
     const rookStartPosition = side === 'kingside' ? kingStartPosition + 3 : kingStartPosition - 4;
-    const rookFinalPosition = side === 'kingside' ? kingStartPosition + 1 : kingStartPosition - 1;
+    const rookFinalPosition = side === 'kingside' ? kingStartPosition - 1 : kingStartPosition + 1;
   
     // Check if the king and rook meet the conditions for a valid castle move
+    const cellsInBetween = getCellsInBetween(kingStartPosition, rookStartPosition, board)
+    console.log(cellsInBetween)
+    if(cellsInBetween === ['', '']|| cellsInBetween === ['', '', ""]){console.log("its falsa")}
     const fieldsBetweenEmpty = side === 'kingside'
       ? board[rookStartPosition - 1] === '' && board[rookStartPosition - 2] === ''
       : board[rookStartPosition + 1] === '' && board[rookStartPosition + 2] === '' && board[rookStartPosition + 3] === '';
-  
+  // console.trace(currentPlayer,board, rookStartPosition, board[rookStartPosition - 1]   , board[rookStartPosition - 2], side, fieldsBetweenEmpty)
     const rookPiece = board[rookStartPosition].slice(0, 2);
     const rookColor = pieceColor(rookPiece)
     const isRookOnStartingPosition = side === 'kingside' ? rookPiece.toLowerCase() === 'rr' : rookPiece.toLowerCase() === 'rl';
+    // console.log(rookColor,isRookOnStartingPosition, fieldsBetweenEmpty  )
     if (!isRookOnStartingPosition){ return false}
-  
+    if (!fieldsBetweenEmpty){return false}
   
     // Check if the king and rook have not moved previously
     const kingMoved = movedPieces[currentPlayer === 'white' ? 'K1' : 'k1'];
     const rookMoved = movedPieces[side === 'kingside' ? (currentPlayer === 'white' ? 'Rr2' : 'rr2') : (currentPlayer === 'white' ? 'Rl2' : 'rl2')];
-
+   console.log( movedPieces.K1, movedPieces, kingMoved, rookMoved, movedPieces, rookColor,isRookOnStartingPosition, fieldsBetweenEmpty )
     // console.log(kingMoved, rookMoved,  currentPlayer === 'white' ? 'K1' : 'k1' ,  side === 'kingside' ? (currentPlayer === 'white' ? 'Rr2' : 'rr2') : (currentPlayer === 'white' ? 'Rl2' : 'rl2') );
     if (kingMoved || rookMoved) {
       return false;
     }
-
+  console.log(kingFinalPosition)
     return kingFinalPosition
     // Check if the king is not in check
    

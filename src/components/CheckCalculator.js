@@ -46,9 +46,9 @@ export const checkWhatGetsPlayerInCheck = (
       );
 
       if (howIsKingAttacked) {
-        console.log(
-          `Move ${potentialMove}  ${pieceIndex}${piece}  ${howIsKingAttacked.enemy}   results in check.`
-        );
+        // console.log(
+        //   `Move ${potentialMove}  ${pieceIndex}${piece}  ${howIsKingAttacked.enemy}   results in check.`
+        // );
         illegalMoves.push({ piece, move: potentialMove });
         // console.log(dummyBoard)
       }
