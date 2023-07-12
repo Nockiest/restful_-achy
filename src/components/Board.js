@@ -53,7 +53,16 @@ const Board = ({ height, width }) => {
   const lastTurn = gameHistory[gameHistory.length - 1];
   const { channel} = useChannelStateContext()
   const { client } = useChatContext();
+  
 
+  const sendTurn = async (updatedGameHistory) => {
+    await setCurPlayer(curPlayer === "white" ? "black" : "white");
+console.log(updatedGameHistory)
+    await channel.sendEvent({
+      type: "game-move",
+      data: { updatedGameHistory },
+    });
+  }
 
   const initializeMovedPieces = () => {
     const pieces = gameRepresentation.flat().filter((piece) => piece !== "");
@@ -129,9 +138,7 @@ const Board = ({ height, width }) => {
      });
     
   };
-
-
-
+ 
     const processMovement = async (selectedId, id, selectedPiece, piece,clickPos) => {
     let capturedPiece = gameRepresentation[Math.floor(id / 8)][id % 8];
     const moveDetails = {
@@ -143,8 +150,8 @@ const Board = ({ height, width }) => {
     };
 
     const updatedGameHistory = [...gameHistory, moveDetails];
-    setGameHistory(updatedGameHistory);
-    // console.log(selectedId, id, selectedPiece, piece, selectedPiece.toLowerCase());
+    await setGameHistory(updatedGameHistory);
+    
 
     setGameRepresentation((prevGameRepresentation) => {
       let updatedGameRepresentation = [...prevGameRepresentation];
@@ -153,7 +160,7 @@ const Board = ({ height, width }) => {
       updatedGameRepresentation[Math.floor(id / 8)][id % 8] = selectedPiece;
       return updatedGameRepresentation;
     });
-    console.log(capturedPiece)
+    
     setCapturedPieces((prevPieces) => [...prevPieces, capturedPiece]);
 
     let capturedByEnPassant = checkEnPassantWasPlayed(curPlayer === "white" ? "white" : "black", lastTurn, moveDetails);
@@ -188,17 +195,16 @@ const Board = ({ height, width }) => {
     }
     const backRankPawnIndex = pawnReachedBackRank(gameRepresentation);
     // console.log(backRankPawnIndex);
-
+  console.log(backRankPawnIndex)
     if (backRankPawnIndex < 0) {
       console.log("switching player");
-      await channel.sendEvent({
-        type: "game-move",
-        data: { gameHistory },
-      });//  setCurPlayer(curPlayer === "white" ? "black" : "white");
+      sendTurn(updatedGameHistory)
+    
     }
+     
     setPawnToEvolveIndex((prev) => {
       prev = backRankPawnIndex;
-      // console.log(prev);
+       console.log(prev);
       return prev;
     });
     
@@ -231,21 +237,16 @@ const Board = ({ height, width }) => {
     setPossibleMoves(filteredMoves);
   };
 
-  channel.on(  (event) => {
-    // console.log("game-move was procured",event.user.id , client.userID)
-    if (event.type == "game-move"  ){
- 
-      console.log("switchingPlayer")
-    
-       
-        setCurPlayer(curPlayer === "white" ? "black" : "white");
-    }
+  channel.on(  (event) => { 
     if (event.type == "game-move" && event.user.id !== client.userID) {
+      setCurPlayer(curPlayer === "white" ? "black" : "white");
        
-      console.log("hello3")
-      const { color, piece, from, to, gameHistory } = event.data.gameHistory;
-      console.log("hello2")
+      const { updatedGameHistory } = event.data;
+      console.log(updatedGameHistory[updatedGameHistory.length-1])
+      const { color, piece, from, to, captured } = updatedGameHistory[updatedGameHistory.length-1]// event.data.gameHistory;
+      console.log( color, piece, from, to, gameHistory )
       setGameRepresentation((prevGameRepresentation) => {
+        console.log(prevGameRepresentation)
         const updatedGameRepresentation = [...prevGameRepresentation];
         const fromRow = Math.floor(from / 8);
         const fromCol = from % 8;
@@ -257,40 +258,26 @@ const Board = ({ height, width }) => {
         updatedGameRepresentation[fromRow][fromCol] = "";
   
         // Handle captured piece if any
-        if (captured) {
-          // Update the captured piece in the opponent's board state
-          const capturedRow = Math.floor(captured / 8);
-          const capturedCol = captured % 8;
-          updatedGameRepresentation[capturedRow][capturedCol] = "";
-        }
+        // if (captured) {
+        //   // Update the captured piece in the opponent's board state
+        //   const capturedRow = Math.floor(captured / 8);
+        //   const capturedCol = captured % 8;
+        //   updatedGameRepresentation[capturedRow][capturedCol] = "";
+        // }
   
         return updatedGameRepresentation;
       });
-      console.log("hello1")
-      setGameHistory(
-        prevhistory =>{
-          console.log(prevHistory)
-          return [...prevHistory, gameHistory]
-        }
-   
-      )
+      
+      // setGameHistory(
+      //   (prevHistory) =>{
+      //     console.log(prevHistory)
+      //     return [...prevHistory, gameHistory]
+      //   }
+      // )
     }
   });
 
-  // useEffect(() => {
-  //   // Create an async function to handle the effect
-  //   const sendGameHistory = async () => {
-      
-  //   };
-  
-  //   // Call the async function
-  //   sendGameHistory();
-  
-  //   // Return the cleanup function
-  //   return () => {
-     
-  //   };
-  // }, [curPlayer]);
+ 
   return (
     <div className="game-screen">
       <div id="table">
@@ -328,12 +315,13 @@ const Board = ({ height, width }) => {
         pawnToEvolveIndex={pawnToEvolveIndex}
         gameRepresentation={gameRepresentation}
         curPlayer={curPlayer}
-        setCurPlayer={setCurPlayer}
+      
         setMovedPieces={setMovedPieces}
         movedPieces={movedPieces}
         setGameRepresentation={setGameRepresentation}
         setPawnToEvolveIndex={setPawnToEvolveIndex}
         gameHistory={gameHistory}
+        sendTurn={sendTurn}
       />
     </div>
   );

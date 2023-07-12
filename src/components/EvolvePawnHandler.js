@@ -1,4 +1,4 @@
-import { useChannelStateContext, useChatContext } from "stream-chat-react";
+// import { useChannelStateContext, useChatContext } from "stream-chat-react";
 
 export const EvolvePawnPanel = ({
   pawnToEvolveIndex,
@@ -7,12 +7,12 @@ export const EvolvePawnPanel = ({
   gameRepresentation,
   setGameRepresentation,
   curPlayer,
-  setCurPlayer,
   movedPieces,
-  gameHistory
+  gameHistory,
+  sendTurn
 }) => {
-  const { channel} = useChannelStateContext()
-  const { client } = useChatContext();
+  // const { channel} = useChannelStateContext()
+  // const { client } = useChatContext();
   const evolvablePieces = ["n", "q", "r", "b"];
 
   const handlePieceSelection = (letter) => {
@@ -46,21 +46,8 @@ export const EvolvePawnPanel = ({
           [pieceType + (pieceCount + 1)]: true,
         };
       });
-
-      // Handle the asynchronous logic here using promises or an async IIFE
-      channel
-        .sendEvent({
-          type: "game-move",
-          data: { gameHistory },
-        })
-        .then(() => {
-          // Handle the response or any additional logic after sending the event
-          // console.log("Event sent successfully");
-        })
-        .catch((error) => {
-          // Handle errors that occur during sending the event
-          console.error("Error sending event:", error);
-        });
+      sendTurn()
+     
     } else {
       console.log("There are still pawns on the backrank. Cannot switch player yet.");
     }
@@ -73,14 +60,14 @@ export const pawnReachedBackRank = (gameRepresentation) => {
 
   for (let col = 0; col < gameRepresentation[backranks.white].length; col++) {
     const piece = gameRepresentation[backranks.white][col];
-    // console.log(
-    //   piece.charAt(0).toLowerCase(),
-    //   piece.charAt(0).toLowerCase() === "p",
-    //   backranks.white * 8 + col,
-    //   gameRepresentation,
-    //   gameRepresentation[backranks.white],
-    //   gameRepresentation[backranks.white][col]
-    // );
+    console.log(
+      piece.charAt(0).toLowerCase(),
+      piece.charAt(0).toLowerCase() === "p",
+      backranks.white * 8 + col,
+      gameRepresentation,
+      gameRepresentation[backranks.white],
+      gameRepresentation[backranks.white][col]
+    );
     if (piece.charAt(0).toLowerCase() === "p") {
       return backranks.white * 8 + col; // Return the index of the pawn
     }

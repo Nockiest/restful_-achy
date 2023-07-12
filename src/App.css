@@ -23,9 +23,7 @@
     font-weight: 900  ;
   }
 
-  .game-history-move{
-    border: 1px solid black;
-  }
+ 
 
   #evolutionRectangle{
     opacity:'1';
@@ -51,3 +49,21 @@
       height: 100px;
       padding-top: 10%;
   };
+
+  .information-panel{
+    width:auto
+  }
+
+  .game-history-overview{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    max-height: 500px;
+    overflow: scroll;
+    width:auto;
+  }
+
+  .game-history-move{
+    border: 1px solid black;
+    width: 100px;
+    text-align: center;
+  }
