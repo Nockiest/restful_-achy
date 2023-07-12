@@ -11,28 +11,11 @@ import { pawnReachedBackRank, EvolvePawnPanel } from "./EvolvePawnHandler";
 import { determineMate } from "./MateCalculator";
 import { determineDraw } from "./DrawCalculator";
 import { useChannelStateContext, useChatContext } from "stream-chat-react";
-import { pieceColor, findKings, checkEnPassantWasPlayed, calculatePossibleMoves, findIfCastled } from "../utils";
+import { pieceColor, findKings, checkEnPassantWasPlayed, calculatePossibleMoves, renderCastle, findIfCastled } from "../utils";
+import { defaultBoardState } from "./BoardStates";
 import InformationPanel from "./InformationPanel";
 const Board = ({ height, width }) => {
-  const [gameRepresentation, setGameRepresentation] = useState([
-    ["rl1", "n1", "b1", "q1", "k1", "b2", "n2", "rr2"],
-    ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8"],
-    ["", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["", "", "", "", "", "", "", ""],
-    ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"],
-    ["Rl1", "N1", "B1", "Q1", "K1", "B2", "N2", "Rr2"],
-
-    // ["rl1", "", "", "", "k1", "", "", "rr2"],
-    // ["q1", "", "", "", "", "", "", ""],
-    // ["", "", "", "", "", "", "", ""],
-    // ["", "", "", "", "", "", "", ""],
-    // ["", "", "", "", "", "", "", ""],
-    // ["", "p1", "", "Q1", "", "", "", ""],
-    // ["", "", "", "", "", "", "", ""],
-    // ["Rl1", "", "", "", "K1", "", "", "Rr2"],
-  ]);
+  const [gameRepresentation, setGameRepresentation] = useState(defaultBoardState);
   const [enPassantPlayed, setEnpassantPlayed] = useState(false);
   const [playerCastled, setPlayerCastled] = useState(false);
   const [inCheck, setInCheck] = useState(false);
@@ -42,34 +25,50 @@ const Board = ({ height, width }) => {
     piece: null,
     curPlayer: null,
   });
-  const [curPlayer, setCurPlayer] = useState("white")
+  const [curPlayer, setCurPlayer] = useState("white");
   const [movedPieces, setMovedPieces] = useState({});
   const [capturedPieces, setCapturedPieces] = useState([]);
   const [possibleMoves, setPossibleMoves] = useState([]);
   const [gameHistory, setGameHistory] = useState([]);
   const [pawnToEvolveIndex, setPawnToEvolveIndex] = useState(null);
-  const [playedMoves, setPlayedMoves] = useState(0);
-  // const [playerChangeCount, setplayerChangeCount] = useState(0);
+  // const [playedMoves, setPlayedMoves] = useState(0);
   const lastTurn = gameHistory[gameHistory.length - 1];
-  const { channel} = useChannelStateContext()
+  const { channel } = useChannelStateContext();
   const { client } = useChatContext();
-  
 
+ 
   const sendTurn = async (updatedGameHistory) => {
     await setCurPlayer(curPlayer === "white" ? "black" : "white");
-console.log(updatedGameHistory)
+  
+    // Save the updated game history to localStorage
+    localStorage.setItem("gameHistory", JSON.stringify(updatedGameHistory));
+  
     await channel.sendEvent({
       type: "game-move",
-      data: { updatedGameHistory },
+      data: { newTurn: updatedGameHistory[updatedGameHistory.length - 1] },
     });
-  }
+  };
+
+  useEffect(() => {
+    let unmounted = false; // Add this flag to track unmounting
+  
+    // Retrieve the game history from localStorage
+    const savedGameHistory = localStorage.getItem("gameHistory");
+    if (!unmounted && savedGameHistory) {
+      setGameHistory(JSON.parse(savedGameHistory));
+    }
+  
+    return () => {
+      unmounted = true; // Update the flag to indicate unmounting
+    };
+  }, []);
+  
 
   const initializeMovedPieces = () => {
     const pieces = gameRepresentation.flat().filter((piece) => piece !== "");
     const newMovedPieces = {};
 
     pieces.forEach((piece) => {
-      console.log(piece === "");
       return (newMovedPieces[piece] = false);
     });
 
@@ -79,23 +78,47 @@ console.log(updatedGameHistory)
     initializeMovedPieces();
   }, []);
 
+  const restartGame = () => {
+    console.log("fired");
+    setGameRepresentation(defaultBoardState);
+    setEnpassantPlayed(false);
+    setPlayerCastled(false);
+    setInCheck(false);
+    setIllegalMoves([]);
+    setSelectedCell({
+      id: null,
+      piece: null,
+      curPlayer: null,
+    });
+    setCurPlayer("white");
+    setMovedPieces({});
+    setCapturedPieces([]);
+    setPossibleMoves([]);
+    setGameHistory([]);
+    setPawnToEvolveIndex(null);
+    // setPlayedMoves(0);
+  };
+
   const processGameMove = async (clickPos, piece) => {
+    console.log(pawnToEvolveIndex);
+    if (pawnToEvolveIndex > 0) {
+      return;
+    }
     // console.log(selectedCell,selectedCell.id === clickPos,selectedCell.id)
     //***   Player deselcted piece  by cclicking on a piece of the same color */
-    if ( ( selectedCell.id !== null && pieceColor(piece) === curPlayer )) {
-        setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
-        setPossibleMoves([]);
+    if (selectedCell.id !== null && pieceColor(piece) === curPlayer) {
+      setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
+      setPossibleMoves([]);
       return;
     }
 
- 
     // ******* Check if it's the second click on a valid move
-    if (selectedCell.id !== null && possibleMoves.includes(clickPos)   ) {
+    if (selectedCell.id !== null && possibleMoves.includes(clickPos)) {
       processMovement(selectedCell.id, clickPos, selectedCell.piece, piece);
 
-     await  setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
+      await setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
       await setPossibleMoves([]);
-      await setPlayedMoves((prevMoves) => prevMoves + 1);
+      // await setPlayedMoves((prevMoves) => prevMoves + 1);
       return;
     }
 
@@ -108,7 +131,7 @@ console.log(updatedGameHistory)
     );
 
     await setIllegalMoves(forbiddenMovement);
-    console.log(forbiddenMovement);
+    // console.log(forbiddenMovement);
     if (forbiddenMovement.includes("king stands in check now")) {
       await setInCheck((prevCheck) => {
         console.log("prevCheck:", prevCheck); // Updated value
@@ -124,7 +147,7 @@ console.log(updatedGameHistory)
     }
 
     // ****** check if players piece was selected
-    const selectedPieceColor = pieceColor(piece);  
+    const selectedPieceColor = pieceColor(piece);
     if (selectedPieceColor !== curPlayer || selectedPieceColor === null) return console.log(selectedPieceColor);
 
     // ******select the piece
@@ -134,12 +157,11 @@ console.log(updatedGameHistory)
     setMovedPieces((prevState) => {
       console.log(piece);
 
-     return { ...prevState, [piece]: true,}
-     });
-    
+      return { ...prevState, [piece]: true };
+    });
   };
- 
-    const processMovement = async (selectedId, id, selectedPiece, piece,clickPos) => {
+
+  const processMovement = async (selectedId, id, selectedPiece, piece, clickPos) => {
     let capturedPiece = gameRepresentation[Math.floor(id / 8)][id % 8];
     const moveDetails = {
       color: curPlayer,
@@ -147,20 +169,20 @@ console.log(updatedGameHistory)
       from: selectedId,
       to: id,
       captured: capturedPiece,
+      castles: findIfCastled(   selectedId, id, selectedPiece),
     };
 
     const updatedGameHistory = [...gameHistory, moveDetails];
     await setGameHistory(updatedGameHistory);
-    
 
-    setGameRepresentation((prevGameRepresentation) => {
+    await setGameRepresentation((prevGameRepresentation) => {
       let updatedGameRepresentation = [...prevGameRepresentation];
-      updatedGameRepresentation = findIfCastled(gameRepresentation, curPlayer, selectedId, id, selectedPiece);
+      updatedGameRepresentation = renderCastle(gameRepresentation, curPlayer, selectedId, id, selectedPiece);
       updatedGameRepresentation[Math.floor(selectedId / 8)][selectedId % 8] = "";
       updatedGameRepresentation[Math.floor(id / 8)][id % 8] = selectedPiece;
       return updatedGameRepresentation;
     });
-    
+
     setCapturedPieces((prevPieces) => [...prevPieces, capturedPiece]);
 
     let capturedByEnPassant = checkEnPassantWasPlayed(curPlayer === "white" ? "white" : "black", lastTurn, moveDetails);
@@ -170,7 +192,7 @@ console.log(updatedGameHistory)
 
       setCapturedPieces((prevPieces) => [...prevPieces, capturedPiece]);
 
-      setGameRepresentation((prevRepresentation) => {
+      await setGameRepresentation((prevRepresentation) => {
         const flattenedRepresentation = prevRepresentation.flat();
         const newGamerep = [];
 
@@ -195,21 +217,15 @@ console.log(updatedGameHistory)
     }
     const backRankPawnIndex = pawnReachedBackRank(gameRepresentation);
     // console.log(backRankPawnIndex);
-  console.log(backRankPawnIndex)
+    console.log(backRankPawnIndex);
     if (backRankPawnIndex < 0) {
       console.log("switching player");
-      sendTurn(updatedGameHistory)
-    
+      sendTurn(updatedGameHistory);
     }
-     
-    setPawnToEvolveIndex((prev) => {
-      prev = backRankPawnIndex;
-       console.log(prev);
-      return prev;
-    });
-    
+
+    setPawnToEvolveIndex(backRankPawnIndex);
     setPossibleMoves([]);
-    setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));   
+    setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
   };
 
   const processPieceSelection = (id, piece, curPlayer, forbiddenMovement) => {
@@ -228,7 +244,7 @@ console.log(updatedGameHistory)
         return move;
       }
       const illegalMove = forbiddenMovement?.find((illegal) => {
-        console.log(illegal, illegal.move, move, illegal.piece === piece, illegal.move === move);
+        // console.log(illegal, illegal.move, move, illegal.piece === piece, illegal.move === move);
         return illegal.piece === piece && illegal.move === move;
       });
       return !illegalMove; // Exclude any move that matches an illegal move
@@ -237,85 +253,90 @@ console.log(updatedGameHistory)
     setPossibleMoves(filteredMoves);
   };
 
-  channel.on(  (event) => { 
-    if (event.type == "game-move" && event.user.id !== client.userID) {
+  channel.on((event) => {
+    if (event.type === "game-move" && event.user.id !== client.userID) {
       setCurPlayer(curPlayer === "white" ? "black" : "white");
-       
-      const { updatedGameHistory } = event.data;
-      console.log(updatedGameHistory[updatedGameHistory.length-1])
-      const { color, piece, from, to, captured } = updatedGameHistory[updatedGameHistory.length-1]// event.data.gameHistory;
-      console.log( color, piece, from, to, gameHistory )
+
+      const { newTurn } = event.data;
+      console.log(newTurn)
+      // console.log(updatedGameHistory[updatedGameHistory.length - 1]);
+       const { color, piece, from, to, captured } = newTurn //updatedGameHistory[updatedGameHistory.length - 1]; 
+      console.log( newTurn) 
+      console.log(color, piece, from, to, newTurn,  );
+    //   if ( gameHistory[gameHistory.length - 1][0])
+    //  { console.log(gameHistory && gameHistory[gameHistory.length - 1][0], updatedGameHistory[updatedGameHistory.length - 1]);
+    //   console.log(gameHistory && gameHistory[gameHistory.length - 1][0] == updatedGameHistory[updatedGameHistory.length - 1]);}
+    //   if (gameHistory[gameHistory.length - 1] == updatedGameHistory[updatedGameHistory.length - 1]) {
+    //     console.log("dont update");
+    //     return;
+    //   }
       setGameRepresentation((prevGameRepresentation) => {
-        console.log(prevGameRepresentation)
+        // console.log(prevGameRepresentation);
         const updatedGameRepresentation = [...prevGameRepresentation];
         const fromRow = Math.floor(from / 8);
         const fromCol = from % 8;
         const toRow = Math.floor(to / 8);
         const toCol = to % 8;
-  
+
         // Move the piece from the 'from' position to the 'to' position
         updatedGameRepresentation[toRow][toCol] = piece;
         updatedGameRepresentation[fromRow][fromCol] = "";
-  
+
         // Handle captured piece if any
-        // if (captured) {
-        //   // Update the captured piece in the opponent's board state
-        //   const capturedRow = Math.floor(captured / 8);
-        //   const capturedCol = captured % 8;
-        //   updatedGameRepresentation[capturedRow][capturedCol] = "";
-        // }
-  
+        if (captured) {
+          // Update the captured piece in the opponent's board state
+          setCapturedPieces((prevPieces) => [...prevPieces, captured]);
+        }
+
         return updatedGameRepresentation;
       });
-      
-      // setGameHistory(
-      //   (prevHistory) =>{
-      //     console.log(prevHistory)
-      //     return [...prevHistory, gameHistory]
-      //   }
-      // )
+
+      setGameHistory((prevHistory) => {
+        // console.log(prevHistory)
+        return [...prevHistory, newTurn ];
+      });
     }
   });
-
  
+
   return (
     <div className="game-screen">
       <div id="table">
-        {Array.from({ length: height }).map((_, i) =>
-          Array.from({ length: width }).map((_, j) => {
-            const index = i * width + j;
-            const isGray = (i + j) % 2 === 1;
-            const piece = gameRepresentation[i][j];
-            const isSelected = selectedCell.id === index;
-            const isHighlighted = possibleMoves.includes(index);
-            return (
-              <Cell
-                key={index}
-                id={index}
-                piece={piece}
-                isGray={isGray}
-                isSelected={isSelected}
-                isHighlighted={isHighlighted}
-                onClick={processGameMove}
-              />
-            );
-          })
-        )}
+        {gameRepresentation &&
+          Array.from({ length: height }).map((_, i) =>
+            Array.from({ length: width }).map((_, j) => {
+              const index = i * width + j;
+              const isGray = (i + j) % 2 === 1;
+              const piece = gameRepresentation[i][j];
+              const isSelected = selectedCell.id === index;
+              const isHighlighted = possibleMoves.includes(index);
+
+              return (
+                <Cell
+                  key={index}
+                  id={index}
+                  piece={piece}
+                  isGray={isGray}
+                  isSelected={isSelected}
+                  isHighlighted={isHighlighted}
+                  onClick={processGameMove}
+                />
+              );
+            })
+          )}
       </div>
-      <div>
-        <InformationPanel
-          selectedCell={selectedCell}
-          curPlayer={curPlayer}
-          inCheck={inCheck}
-          gameHistory={gameHistory}
-          capturedPieces={capturedPieces}
-        />
-      </div>
+
+      <InformationPanel
+        selectedCell={selectedCell}
+        curPlayer={curPlayer}
+        inCheck={inCheck}
+        gameHistory={gameHistory}
+        capturedPieces={capturedPieces}
+      />
       <EvolvePawnPanel
         pawnToEvolveIndex={pawnToEvolveIndex}
         gameRepresentation={gameRepresentation}
         curPlayer={curPlayer}
-      
         setMovedPieces={setMovedPieces}
         movedPieces={movedPieces}
         setGameRepresentation={setGameRepresentation}
@@ -323,6 +344,8 @@ console.log(updatedGameHistory)
         gameHistory={gameHistory}
         sendTurn={sendTurn}
       />
+
+      <button onClick={() => restartGame()}>RESTART</button>
     </div>
   );
 };

@@ -9,10 +9,8 @@ export const EvolvePawnPanel = ({
   curPlayer,
   movedPieces,
   gameHistory,
-  sendTurn
+  sendTurn,
 }) => {
-  // const { channel} = useChannelStateContext()
-  // const { client } = useChatContext();
   const evolvablePieces = ["n", "q", "r", "b"];
 
   const handlePieceSelection = (letter) => {
@@ -28,46 +26,53 @@ export const EvolvePawnPanel = ({
 
       updatedGameRepresentation[row][col] = pieceType + (pieceCount + 1);
     }
-
-    // Perform any other necessary actions with the updated game representation
-    // console.log("Updated Game Representation:", updatedGameRepresentation);
-
     // Check if there are any pawns on the backrank
     const backrankPawnIndex = pawnReachedBackRank(updatedGameRepresentation);
     if (backrankPawnIndex === -1) {
       // No pawns on the backrank, update the game representation and set the current player
       setGameRepresentation(updatedGameRepresentation);
-      // setCurPlayer(curPlayer === "white" ? "black" : "white");
+      console.log("sending turn");
+      sendTurn();
+
       setPawnToEvolveIndex(false);
       setMovedPieces((movedPieces) => {
-        // console.log(movedPieces, "Before Update");
         return {
           ...movedPieces,
           [pieceType + (pieceCount + 1)]: true,
         };
       });
-      sendTurn()
-     
     } else {
       console.log("There are still pawns on the backrank. Cannot switch player yet.");
     }
   };
-
-  // Rest of the component code...
+  
+  return (
+    <div className="evolve-pawn-panel">
+      {typeof pawnToEvolveIndex == "number" && pawnToEvolveIndex >= 0 && (
+        <div id="evolutionRectangle">
+          {evolvablePieces.map((letter) => (
+            <div key={letter} className="evolutionPiece" onClick={() => handlePieceSelection(letter)}>
+              {curPlayer === "white" ? letter.toUpperCase() : letter}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 export const pawnReachedBackRank = (gameRepresentation) => {
   const backranks = { white: 0, black: 7 };
 
   for (let col = 0; col < gameRepresentation[backranks.white].length; col++) {
     const piece = gameRepresentation[backranks.white][col];
-    console.log(
-      piece.charAt(0).toLowerCase(),
-      piece.charAt(0).toLowerCase() === "p",
-      backranks.white * 8 + col,
-      gameRepresentation,
-      gameRepresentation[backranks.white],
-      gameRepresentation[backranks.white][col]
-    );
+// // console.log(
+//   piece.charAt(0).toLowerCase(),
+//   piece.charAt(0).toLowerCase() === "p",
+//   backranks.white * 8 + col,
+//   gameRepresentation,
+//   gameRepresentation[backranks.white],
+//   gameRepresentation[backranks.white][col]
+// );
     if (piece.charAt(0).toLowerCase() === "p") {
       return backranks.white * 8 + col; // Return the index of the pawn
     }

@@ -8,10 +8,10 @@ import calculatePawnMoves from "./components/pieceMovements/pawnMoveCalculator";
 
 
 export const pieceColor = (piece) => {
-  if (piece === '') {
+  if (piece === '' || piece == undefined) {
     return null;
   }
-  // console.log(piece,  piece.toLowerCase() === piece )
+ 
   return piece.toLowerCase() === piece ? 'black' : 'white';
 };
 
@@ -35,8 +35,8 @@ export const findKings = (gameRepresentation) => {
 
 
   export function checkEnPassantWasPlayed( playerColor, lastTurn, thisTurn){
-    // console.log(thisTurn)
-    if(!lastTurn){return  false}
+    //  console.log(playerColor, lastTurn, thisTurn)
+    if(!lastTurn|| lastTurn.length === 0){return  false}
     // console.log("D")
     if(lastTurn.piece.toLowerCase() !== "p"){return false}
     console.log("D")
@@ -78,7 +78,17 @@ export const findKings = (gameRepresentation) => {
     }
   };
 
-  export const findIfCastled = (gameRepresentation, currentPlayer, selectedId, id, selectedPiece) => {
+export const findIfCastled = (   selectedId, id, selectedPiece) => {
+  if (selectedPiece.toLowerCase() === "k1") {
+    if (Math.abs(selectedId - id) !== 2) {
+      return false
+    }  else {
+      return true
+    }
+}
+}
+
+  export const renderCastle = (gameRepresentation, currentPlayer, selectedId, id, selectedPiece) => {
     if (selectedPiece.toLowerCase() === "k1") {
       if (Math.abs(selectedId - id) !== 2) {
         console.log("didn't castle");
