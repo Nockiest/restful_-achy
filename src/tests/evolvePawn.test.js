@@ -1,5 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { EvolvePawnPanel } from "../components/EvolvePawnHandler";
+import React from 'react';
+import { shallow } from 'enzyme';
+ 
 
 describe("EvolvePawnPanel", () => {
   test("should update game representation and moved pieces on piece selection", () => {
@@ -46,7 +49,31 @@ describe("EvolvePawnPanel", () => {
   });
 });
 
- 
+test("handlePieceSelection should be called when a letter is clicked", () => {
+  const handlePieceSelectionMock = jest.fn();
+  
+  // Render the component and pass the mock function as the handlePieceSelection prop
+  const wrapper = shallow(
+    <EvolvePawnPanel
+      pawnToEvolveIndex={3}
+      setMovedPieces={jest.fn()}
+      setPawnToEvolveIndex={jest.fn()}
+      gameRepresentation={[]}
+      setGameRepresentation={jest.fn()}
+      curPlayer="black"
+      movedPieces={{}}
+      gameHistory={[]}
+      sendTurn={jest.fn()}
+      handlePieceSelection={handlePieceSelectionMock} // Pass the mock function
+    />
+  );
+
+  // Simulate a click on a letter
+  wrapper.find(".n").first().simulate("click");
+
+  // Verify that handlePieceSelection was called with the correct arguments
+  expect(handlePieceSelectionMock).toHaveBeenCalledWith("n");
+});
 // import Board from "../components/Board";
 
 // describe("Board", () => {

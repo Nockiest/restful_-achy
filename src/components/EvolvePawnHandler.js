@@ -32,7 +32,7 @@ export const EvolvePawnPanel = ({
       // No pawns on the backrank, update the game representation and set the current player
       setGameRepresentation(updatedGameRepresentation);
       console.log("sending turn");
-      sendTurn();
+       sendTurn( gameHistory, gameRepresentation);
 
       setPawnToEvolveIndex(false);
       setMovedPieces((movedPieces) => {
@@ -51,7 +51,7 @@ export const EvolvePawnPanel = ({
       {typeof pawnToEvolveIndex == "number" && pawnToEvolveIndex >= 0 && (
         <div id="evolutionRectangle">
           {evolvablePieces.map((letter) => (
-            <div key={letter} className="evolutionPiece" onClick={() => handlePieceSelection(letter)}>
+            <div key={letter} className={`evolutionPiece ${letter}`} onClick={() => handlePieceSelection(letter)}>
               {curPlayer === "white" ? letter.toUpperCase() : letter}
             </div>
           ))}

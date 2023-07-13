@@ -119,6 +119,37 @@ export const findIfCastled = (   selectedId, id, selectedPiece) => {
   }// tahle finkce nepodporuje dummyBoard 
   return result;
 };
+
+export function isEqual(obj1, obj2) {
+  // Check if both objects are objects and not null
+  
+  if (typeof obj1 !== "object" || obj1 === null || typeof obj2 !== "object" || obj2 === null) {
+    return false;
+  }
+
+  // Get the keys of obj1 and obj2
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  // Check if the number of keys is the same
+  // console.log(keys1.length ,keys2.length)
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+
+  // Check if the values of each key are equal
+  for (let key of keys1) {
+    
+    if (obj1[key] !== obj2[key]) {
+      // console.log("isnt equall" ,obj1[key], obj2[key], obj1[key] === obj2[key], obj1[key] ===undefined, obj1[key] ===null, obj1[key] === isNaN( obj1[key] )  )
+      return false;
+    }
+  }
+ 
+  // Objects are equal
+  return true;
+}
+
   //  
  // const simulateMove = (gameRepresentation, from, to, piece, player) => {
   //   const clonedGameRepresentation = JSON.parse(

@@ -72,13 +72,13 @@ function calculateKingMoves(position, color, board, gameHistory, movedPieces,inC
     // Check if the king and rook have not moved previously
     const kingMoved = movedPieces[currentPlayer === 'white' ? 'K1' : 'k1'];
     const rookMoved = movedPieces[side === 'kingside' ? (currentPlayer === 'white' ? 'Rr2' : 'rr2') : (currentPlayer === 'white' ? 'Rl2' : 'rl2')];
-    console.log(isEveryFieldEmptyString, cellsInBetween, isRookOnStartingPosition, kingMoved, rookMoved)
+    // console.log(isEveryFieldEmptyString, cellsInBetween, isRookOnStartingPosition, kingMoved, rookMoved)
     
     if (kingMoved || rookMoved) {
       return false;
     }
     if (!isRookOnStartingPosition){ return false}
-    if(!isEveryFieldEmptyString){ return console.log("its false")}
+    if(!isEveryFieldEmptyString){ return }
 // console.log(kingFinalPosition)
     return kingFinalPosition
     // Check if the king is not in check

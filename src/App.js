@@ -41,7 +41,6 @@ if (token) {
       token
     )
     .then((user) => {
-      console.log(user)
        setIsAuth(true);
     });
 }
