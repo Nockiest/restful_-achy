@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Cell from "./Cell";
 import calculateRookMoves from "./pieceMovements/rookMoveCalculator";
 import calculateKnightMoves from "./pieceMovements/knightMoveCalculator";
@@ -11,15 +11,23 @@ import { pawnReachedBackRank, EvolvePawnPanel } from "./EvolvePawnHandler";
 import { determineMate } from "./MateCalculator";
 import { determineDraw } from "./DrawCalculator";
 import { useChannelStateContext, useChatContext } from "stream-chat-react";
-import { pieceColor, findKings, checkEnPassantWasPlayed, calculatePossibleMoves, renderCastle, findIfCastled, isEqual } from "../utils";
+import {
+  pieceColor,
+  findKings,
+  checkEnPassantWasPlayed,
+  calculatePossibleMoves,
+  renderCastle,
+  findIfCastled,
+  isEqual,
+} from "../utils";
 import { defaultBoardState } from "./BoardStates";
 import InformationPanel from "./InformationPanel";
-const Board = ({ height, width }) => {
+import TimeContext from "../Context";
+const Board = ({ height, width, player, setPlayer }) => {
   const [gameRepresentation, setGameRepresentation] = useState(defaultBoardState);
   const [enPassantPlayed, setEnpassantPlayed] = useState(false);
   const [playerCastled, setPlayerCastled] = useState(false);
   const [inCheck, setInCheck] = useState(false);
-  
   const [illegalMoves, setIllegalMoves] = useState(false);
   const [selectedCell, setSelectedCell] = useState({
     id: null,
@@ -32,27 +40,32 @@ const Board = ({ height, width }) => {
   const [possibleMoves, setPossibleMoves] = useState([]);
   const [gameHistory, setGameHistory] = useState([]);
   const [pawnToEvolveIndex, setPawnToEvolveIndex] = useState(null);
-  const [callCount, setCallCount] = useState(0)
-  const [whiteTime, setWhiteTime] = useState(100);
-  const [blackTime, setBlackTime] = useState(100);
-  const [gameFinnshed, setGameFinnnished] = useState(false)
-
+  const [callCount, setCallCount] = useState(0);
+  const [whiteTime, setWhiteTime] = useState(100000);
+  const [blackTime, setBlackTime] = useState(100000);
+  const [gameFinnshed, setGameFinnnished] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      console.log(player);
+      if (player === null && player !== "black") {
+        setPlayer("black");
+      }
+    }, 1000);
+  }, [player]);
   useEffect(() => {
     const interval = setInterval(() => {
-      if (curPlayer === 'white') {
-        if (whiteTime> 0){
-          setWhiteTime((prevTime) => Math.max( prevTime - 1 , 0));
+      if (curPlayer === "white") {
+        if (whiteTime > 0) {
+          setWhiteTime((prevTime) => Math.max(prevTime - 1, 0));
         } else {
-          announceGameWin("black", "won")
+          announceGameWin("black", "won");
         }
-        
       } else if (curPlayer === "black") {
-        if (whiteTime > 0){
-          setBlackTime((prevTime) =>Math.max( prevTime - 1 , 0));
+        if (whiteTime > 0) {
+          setBlackTime((prevTime) => Math.max(prevTime - 1, 0));
         } else {
-          announceGameWin("white", "won")
+          announceGameWin("white", "won");
         }
-       
       }
     }, 1000);
 
@@ -65,20 +78,18 @@ const Board = ({ height, width }) => {
   const { channel } = useChannelStateContext();
   const { client } = useChatContext();
 
- 
   const sendTurn = async (updatedGameHistory, gameRepresentation) => {
     await setCurPlayer(curPlayer === "white" ? "black" : "white");
-    await setCallCount(prev => prev+1)
-    console.log(callCount)
-    
-  
+    await setCallCount((prev) => prev + 1);
+    console.log(callCount);
+
     await channel.sendEvent({
       type: "game-move",
       data: { newTurn: updatedGameHistory[updatedGameHistory.length - 1], gameRepresentation },
     });
   };
   const announceGameWin = async (winner, state) => {
-    setGameFinnnished(true)
+    setGameFinnnished(true);
     await channel.sendEvent({
       type: "game-won",
       data: { winner, state },
@@ -87,18 +98,18 @@ const Board = ({ height, width }) => {
 
   useEffect(() => {
     let unmounted = false; // Add this flag to track unmounting
-  
+
     // Retrieve the game history from localStorage
     const savedGameHistory = localStorage.getItem("gameHistory");
     if (!unmounted && savedGameHistory) {
       // setGameHistory(JSON.parse(savedGameHistory));
     }
-  
+
     return () => {
       unmounted = true; // Update the flag to indicate unmounting
     };
+    console.log(player);
   }, []);
-  
 
   const initializeMovedPieces = () => {
     const pieces = gameRepresentation.flat().filter((piece) => piece !== "");
@@ -115,7 +126,6 @@ const Board = ({ height, width }) => {
   }, []);
 
   const restartGame = () => {
-    
     setGameRepresentation(defaultBoardState);
     setEnpassantPlayed(false);
     setPlayerCastled(false);
@@ -136,7 +146,9 @@ const Board = ({ height, width }) => {
   };
 
   const processGameMove = async (clickPos, piece) => {
-    if(gameFinnshed){return}
+    if (gameFinnshed || player !== curPlayer) {
+      return;
+    }
     console.log(pawnToEvolveIndex);
     if (pawnToEvolveIndex > 0) {
       return;
@@ -176,18 +188,18 @@ const Board = ({ height, width }) => {
       });
 
       const canEscape = determineMate(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
-      if(!canEscape){
-        console.log(canEscape)
-// announceGameWin(curPlayer, "won")
+      if (!canEscape) {
+        console.log(canEscape);
+        // announceGameWin(curPlayer, "won")
       }
       console.log("canEscape: ", canEscape);
     } else {
       await setInCheck(false);
       const canMove = determineDraw(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
       console.log("can he move something? ", canMove);
-      if(!canMove){
-        console.log("IS DRAW?", canMove )
-        announceGameWin(curPlayer, "tie")
+      if (!canMove) {
+        console.log("IS DRAW?", canMove);
+        announceGameWin(curPlayer, "tie");
       }
     }
 
@@ -214,7 +226,7 @@ const Board = ({ height, width }) => {
       from: selectedId,
       to: id,
       captured: capturedPiece,
-      castles: findIfCastled(   selectedId, id, selectedPiece),
+      castles: findIfCastled(selectedId, id, selectedPiece),
     };
 
     const updatedGameHistory = [...gameHistory, moveDetails];
@@ -265,7 +277,7 @@ const Board = ({ height, width }) => {
     console.log(backRankPawnIndex);
     if (backRankPawnIndex < 0) {
       console.log("switching player");
-      sendTurn(updatedGameHistory,gameRepresentation );
+      sendTurn(updatedGameHistory, gameRepresentation);
     }
 
     setPawnToEvolveIndex(backRankPawnIndex);
@@ -297,22 +309,13 @@ const Board = ({ height, width }) => {
 
     setPossibleMoves(filteredMoves);
   };
- 
 
-  let processingPromise = Promise.resolve(); // Initialize with a resolved promise
-  let isProcessing = false;
+  channel.on("game-move", async (event) => {
+    setCallCount((prev) => prev + 1);
+    if (event.user.id !== client.userID) {
+      const { newTurn, gameRepresentation } = event.data;
+      setCurPlayer((prevPlayer) => (prevPlayer === "white" ? "black" : "white"));
 
-
-const recieveMove =   (event) => {
-    setCallCount(prev => prev +1 )
-  if (event.user.id !== client.userID && !isProcessing) {
-    isProcessing = true;
-
-    const { newTurn, gameRepresentation } = event.data;
-    setCurPlayer((prevPlayer) => (prevPlayer === "white" ? "black" : "white"));
-
-    // Create a new promise that resolves after the previous processing is completed
-    processingPromise = processingPromise.then(async () => {
       // Delay the execution for 2 seconds
       setGameRepresentation(gameRepresentation);
       setGameHistory((prevHistory) => {
@@ -325,84 +328,82 @@ const recieveMove =   (event) => {
         console.log(updatedHistory);
         return updatedHistory;
       });
-      isProcessing = false;
-    });
-  }
-}
-channel.on("game-move", async (event) => {
-  recieveMove(event) 
-  await channel.off('game-move')
-});
-channel.on("game-won", async (event) => {
-  setGameFinnnished(event) 
-  await channel.off('game-move')
-});
-
-useEffect(() => {
-  
-  setGameHistory((prevHistory) => {
-    let updatedHistory = [...prevHistory];
-    for (let i = 0; i < updatedHistory.length - 1; i++) {
-      console.log(updatedHistory[i], updatedHistory[i + 1], isEqual(updatedHistory[i], updatedHistory[i + 1]) )
-      if (isEqual(updatedHistory[i], updatedHistory[i + 1])) {
-        updatedHistory.splice(i, 1);
-      }
     }
-    return updatedHistory;
+    await channel.off("game-move");
   });
-}, [callCount]) // remove duplicate gamehistory calls
-  
+  channel.on("game-won", async (event) => {
+    setGameFinnnished(event);
+    await channel.off("game-move");
+  });
+
+  useEffect(() => {
+    setGameHistory((prevHistory) => {
+      let updatedHistory = [...prevHistory];
+      for (let i = 0; i < updatedHistory.length - 1; i++) {
+        console.log(updatedHistory[i], updatedHistory[i + 1], isEqual(updatedHistory[i], updatedHistory[i + 1]));
+        if (isEqual(updatedHistory[i], updatedHistory[i + 1])) {
+          updatedHistory.splice(i, 1);
+        }
+      }
+      return updatedHistory;
+    });
+  }, [callCount]); // remove duplicate gamehistory calls
 
   return (
-    <div className="game-screen">
-      <div id="table">
-        {gameRepresentation &&
-          Array.from({ length: height }).map((_, i) =>
-            Array.from({ length: width }).map((_, j) => {
-              const index = i * width + j;
-              const isGray = (i + j) % 2 === 1;
-              const piece = gameRepresentation[i][j];
-              const isSelected = selectedCell.id === index;
-              const isHighlighted = possibleMoves.includes(index);
+    <div className="game-screen" style={{ background: gameFinnshed ? "red" : "white" }}>
+      <TimeContext.Provider value={{ whiteTime, blackTime }}>
+        <div>
+          {player === curPlayer && <h1>YOUR TURN</h1>}
+          <div id="table">
+            {gameRepresentation &&
+              Array.from({ length: height }).map((_, i) =>
+                Array.from({ length: width }).map((_, j) => {
+                  const index = i * width + j;
+                  const isGray = (i + j) % 2 === 1;
+                  const piece = gameRepresentation[i][j];
+                  const isSelected = selectedCell.id === index;
+                  const isHighlighted = possibleMoves.includes(index);
 
-              return (
-                <Cell
-                  key={index}
-                  id={index}
-                  piece={piece}
-                  isGray={isGray}
-                  isSelected={isSelected}
-                  isHighlighted={isHighlighted}
-                  onClick={processGameMove}
-                />
-              );
-            })
-          )}
-      </div>
+                  return (
+                    <Cell
+                      key={index}
+                      id={index}
+                      piece={piece}
+                      isGray={isGray}
+                      isSelected={isSelected}
+                      isHighlighted={isHighlighted}
+                      onClick={processGameMove}
+                    />
+                  );
+                })
+              )}
+          </div>
+        </div>
+        <InformationPanel
+          selectedCell={selectedCell}
+          curPlayer={curPlayer}
+          inCheck={inCheck}
+          gameHistory={gameHistory}
+          capturedPieces={capturedPieces}
+          whiteTime={whiteTime}
+          blackTime={blackTime}
+        />
 
-      <InformationPanel
-        selectedCell={selectedCell}
-        curPlayer={curPlayer}
-        inCheck={inCheck}
-        gameHistory={gameHistory}
-        capturedPieces={capturedPieces}
-        whiteTime={whiteTime}
-        blackTime={blackTime}
-      />
-       
-      <EvolvePawnPanel
-        pawnToEvolveIndex={pawnToEvolveIndex}
-        gameRepresentation={gameRepresentation}
-        curPlayer={curPlayer}
-        setMovedPieces={setMovedPieces}
-        movedPieces={movedPieces}
-        setGameRepresentation={setGameRepresentation}
-        setPawnToEvolveIndex={setPawnToEvolveIndex}
-        gameHistory={gameHistory}
-        sendTurn={sendTurn}
-      />
+        <EvolvePawnPanel
+          pawnToEvolveIndex={pawnToEvolveIndex}
+          gameRepresentation={gameRepresentation}
+          curPlayer={curPlayer}
+          setMovedPieces={setMovedPieces}
+          movedPieces={movedPieces}
+          setGameRepresentation={setGameRepresentation}
+          setPawnToEvolveIndex={setPawnToEvolveIndex}
+          gameHistory={gameHistory}
+          sendTurn={sendTurn}
+        />
 
-      {/* <button onClick={() => restartGame()}>RESTART</button> */}
+        {/* <button onClick={() => restartGame()}>RESTART</button> */}
+        {/* Your component hierarchy */}
+      </TimeContext.Provider>
     </div>
   );
 };
