@@ -33,15 +33,26 @@ const Board = ({ height, width }) => {
   const [gameHistory, setGameHistory] = useState([]);
   const [pawnToEvolveIndex, setPawnToEvolveIndex] = useState(null);
   const [callCount, setCallCount] = useState(0)
-  const [whiteTime, setWhiteTime] = useState(60);
-  const [blackTime, setBlackTime] = useState(60);
+  const [whiteTime, setWhiteTime] = useState(100);
+  const [blackTime, setBlackTime] = useState(100);
+  const [gameFinnshed, setGameFinnnished] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (curPlayer === 'white') {
-        setWhiteTime((prevTime) => prevTime - 1);
+        if (whiteTime> 0){
+          setWhiteTime((prevTime) => Math.max( prevTime - 1 , 0));
+        } else {
+          announceGameWin("black", "won")
+        }
+        
       } else if (curPlayer === "black") {
-        setBlackTime((prevTime) => prevTime - 1);
+        if (whiteTime > 0){
+          setBlackTime((prevTime) =>Math.max( prevTime - 1 , 0));
+        } else {
+          announceGameWin("white", "won")
+        }
+       
       }
     }, 1000);
 
@@ -59,12 +70,18 @@ const Board = ({ height, width }) => {
     await setCurPlayer(curPlayer === "white" ? "black" : "white");
     await setCallCount(prev => prev+1)
     console.log(callCount)
-    // Save the updated game history to localStorage
-    // localStorage.setItem("gameHistory", JSON.stringify(updatedGameHistory));
+    
   
     await channel.sendEvent({
       type: "game-move",
       data: { newTurn: updatedGameHistory[updatedGameHistory.length - 1], gameRepresentation },
+    });
+  };
+  const announceGameWin = async (winner, state) => {
+    setGameFinnnished(true)
+    await channel.sendEvent({
+      type: "game-won",
+      data: { winner, state },
     });
   };
 
@@ -98,7 +115,7 @@ const Board = ({ height, width }) => {
   }, []);
 
   const restartGame = () => {
-    console.log("fired");
+    
     setGameRepresentation(defaultBoardState);
     setEnpassantPlayed(false);
     setPlayerCastled(false);
@@ -119,6 +136,7 @@ const Board = ({ height, width }) => {
   };
 
   const processGameMove = async (clickPos, piece) => {
+    if(gameFinnshed){return}
     console.log(pawnToEvolveIndex);
     if (pawnToEvolveIndex > 0) {
       return;
@@ -158,11 +176,19 @@ const Board = ({ height, width }) => {
       });
 
       const canEscape = determineMate(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
+      if(!canEscape){
+        console.log(canEscape)
+// announceGameWin(curPlayer, "won")
+      }
       console.log("canEscape: ", canEscape);
     } else {
       await setInCheck(false);
-      const isDraw = determineDraw(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
-      console.log("can he move something? ", isDraw);
+      const canMove = determineDraw(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
+      console.log("can he move something? ", canMove);
+      if(!canMove){
+        console.log("IS DRAW?", canMove )
+        announceGameWin(curPlayer, "tie")
+      }
     }
 
     // ****** check if players piece was selected
@@ -274,14 +300,11 @@ const Board = ({ height, width }) => {
  
 
   let processingPromise = Promise.resolve(); // Initialize with a resolved promise
-let isProcessing = false;
+  let isProcessing = false;
 
 
 const recieveMove =   (event) => {
- 
     setCallCount(prev => prev +1 )
-  console.log(callCount)
-  console.log(new Date())
   if (event.user.id !== client.userID && !isProcessing) {
     isProcessing = true;
 
@@ -310,9 +333,13 @@ channel.on("game-move", async (event) => {
   recieveMove(event) 
   await channel.off('game-move')
 });
+channel.on("game-won", async (event) => {
+  setGameFinnnished(event) 
+  await channel.off('game-move')
+});
 
 useEffect(() => {
-  console.log("fixing history")
+  
   setGameHistory((prevHistory) => {
     let updatedHistory = [...prevHistory];
     for (let i = 0; i < updatedHistory.length - 1; i++) {
@@ -321,55 +348,10 @@ useEffect(() => {
         updatedHistory.splice(i, 1);
       }
     }
-    console.log(updatedHistory);
     return updatedHistory;
   });
 }, [callCount]) // remove duplicate gamehistory calls
-  // channel.on((event) => {
-  //   if (event.type === "game-move" && event.user.id !== client.userID) {
-  //     setCurPlayer(curPlayer === "white" ? "black" : "white");
-
-  //     const { newTurn } = event.data;
-  //     console.log(newTurn)
-  //     // console.log(updatedGameHistory[updatedGameHistory.length - 1]);
-  //      const { color, piece, from, to, captured } = newTurn //updatedGameHistory[updatedGameHistory.length - 1]; 
-  //     console.log( newTurn) 
-  //     console.log(color, piece, from, to, newTurn,  );
-  //   //   if ( gameHistory[gameHistory.length - 1][0])
-  //   //  { console.log(gameHistory && gameHistory[gameHistory.length - 1][0], updatedGameHistory[updatedGameHistory.length - 1]);
-  //   //   console.log(gameHistory && gameHistory[gameHistory.length - 1][0] == updatedGameHistory[updatedGameHistory.length - 1]);}
-  //   //   if (gameHistory[gameHistory.length - 1] == updatedGameHistory[updatedGameHistory.length - 1]) {
-  //   //     console.log("dont update");
-  //   //     return;
-  //   //   }
-  //     setGameRepresentation((prevGameRepresentation) => {
-  //       // console.log(prevGameRepresentation);
-  //       const updatedGameRepresentation = [...prevGameRepresentation];
-  //       const fromRow = Math.floor(from / 8);
-  //       const fromCol = from % 8;
-  //       const toRow = Math.floor(to / 8);
-  //       const toCol = to % 8;
-
-  //       // Move the piece from the 'from' position to the 'to' position
-  //       updatedGameRepresentation[toRow][toCol] = piece;
-  //       updatedGameRepresentation[fromRow][fromCol] = "";
-
-  //       // Handle captured piece if any
-  //       if (captured) {
-  //         // Update the captured piece in the opponent's board state
-  //         setCapturedPieces((prevPieces) => [...prevPieces, captured]);
-  //       }
-
-  //       return updatedGameRepresentation;
-  //     });
-
-  //     setGameHistory((prevHistory) => {
-  //       // console.log(prevHistory)
-  //       return [...prevHistory, newTurn ];
-  //     });
-  //   }
-  // });
- 
+  
 
   return (
     <div className="game-screen">
@@ -420,7 +402,7 @@ useEffect(() => {
         sendTurn={sendTurn}
       />
 
-      <button onClick={() => restartGame()}>RESTART</button>
+      {/* <button onClick={() => restartGame()}>RESTART</button> */}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState, Children, useEffect } from "react";
 import Board from "../Board";
 import "./Chat.css";
 import { Window, MessageList, MessageInput } from "stream-chat-react";
@@ -9,11 +9,30 @@ const Game = ({ channel, setChannel }) => {
     setPlayersJoined(event.watcher_count === 2);
   });
 
+  channel.on("game-won", (event) => {
+    setResult({winner: event.data.winner, state:"won"})
+  });
+ 
+
   if (!playersJoined) {
     return <h1> waiting for other player...</h1>;
   }
   return (
-    <div>
+    <div className="game">
+      <div className="btn-col"> 
+          <button className="leave-game-btn"
+          onClick={async () => {
+            await channel.stopWatching();
+            setChannel(null);
+          }}
+        >
+          {" "}
+          Leave Game
+        </button>
+        <button>
+          RESTART game
+        </button>
+      </div>
       <Board
         result={result}
         setResult={setResult}
@@ -21,21 +40,14 @@ const Game = ({ channel, setChannel }) => {
         width={8}
         
       />
+       {result.state === "won" && <div> {result.winner} Won The Game</div>}
+      {result.state === "tie" && <div> Game Tieds</div>}
       <Window>
         <MessageList disableDateSeparator closeReactionSelectorOnClick hideDeletedMessages messageActions={["react"]} />
         <MessageInput noFiles />
       </Window>
-      <button
-        onClick={async () => {
-          await channel.stopWatching();
-          setChannel(null);
-        }}
-      >
-        {" "}
-        Leave Game
-      </button>
-      {result.state === "won" && <div> {result.winner} Won The Game</div>}
-      {result.state === "tie" && <div> Game Tieds</div>}
+    
+      
     </div>
   );
 };

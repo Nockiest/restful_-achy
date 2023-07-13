@@ -1,28 +1,15 @@
 import React from 'react'
-
-const Clock = (curPlayer) => {
-
-    const [whiteTime, setWhiteTime] = useState(60);
-    const [blackTime, setBlackTime] = useState(60);
-  
-    useEffect(() => {
-      const interval = setInterval(() => {
-        if (curPlayer === 'white') {
-          setWhiteTime((prevTime) => prevTime - 1);
-        } else if (curPlayer === "black") {
-          setBlackTime((prevTime) => prevTime - 1);
-        }
-      }, 1000);
-  
-      return () => {
-        clearInterval(interval);
-      };
-    }, [curPlayer]);
-
+import TimeContext, {WinAnnounceContext} from "./Context"
+const Clock = () => {
+ 
   return (
     <div className='clock'>
-    <div>Player 1: {whiteTime} seconds</div>
-    <div>Player 2: {blackTime} seconds</div>
+         <TimeContext.Provider value={{ whiteTime, blackTime }}> 
+         <div className="clock">
+            <div>Player 1: {whiteTime >  1 ? `${whiteTime} seconds` : 'Player run out of time'}</div>
+            <div>Player 2: {blackTime >  1 ? `${blackTime} seconds` : 'Player run out of time'}</div>
+        </div>
+         </TimeContext.Provider>
  </div>
   )
 }

@@ -6,6 +6,17 @@
     width: 100%;
  }
 
+ .game{
+  display: flex;
+  flex-direction: row;
+
+  
+ }
+
+ .game > .btn-col > button{
+ width:100%   
+ }
+
  #table {
     margin-bottom: 30px;
     border: 2px solid black;
@@ -23,7 +34,9 @@
     font-weight: 900  ;
   }
 
- 
+ .leave-game-btn{
+  max-height: 50px;
+ }
 
   #evolutionRectangle{
     opacity:'1';
