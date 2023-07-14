@@ -15,7 +15,6 @@ function JoinGame() {
       return;
     }
     
-    
     const newChannel = await client.channel("messaging", {
       members: [client.userID, response.users[0].id],
       player: "white",

@@ -1,5 +1,6 @@
-//import React from 'react';
+import { useState, useEffect } from "react";
 import pieces from "../CheccPieceImageURLS";
+import { getPieceImage } from "../utils";
 
 const Cell = (props) => {
   const { id, piece, isGray, isSelected, isHighlighted, onClick } = props;
@@ -12,19 +13,18 @@ const Cell = (props) => {
     ...(isSelected && { background: "yellow" }), // Highlight the selected cell
     ...(isHighlighted && { background: "green" }), // Highlight the possible move
   };
-    // let imageURL = null;
-    // // Extract the letter from the piece
-    // if (piece !== null) {
-    // console.log(piece)
-    // const letter = piece[0].tolowerCase();
+  const [imageURL, setImageURL] = useState(null);
 
-    // // Find the matching object value with the same first letter (case-insensitive)
-    // const matchingPiece = Object.values(pieces).find((pieceObj) => pieceObj.name[0].tolowerCase() === letter);
-
-    // // Determine the image URL based on the piece color
-    // imageUrl = matchingPiece[piece.toUpperCase() === piece ? "white" : "black"];
-    // console.log(imageURL)
-// }
+  useEffect(() => {
+    try {
+     
+      const pieceImg = getPieceImage(piece, pieces)
+      console.log(pieceImg)
+      setImageURL(pieceImg);
+    } catch (error) {
+      console.log(error);
+    }
+  }, [piece]);
 
   return (
     <div
@@ -33,8 +33,15 @@ const Cell = (props) => {
       data-testid={`cell-${id}`}
       onClick={() => onClick(id, piece)}
     >
-      {id}
-      {piece && <img src={"https://i.postimg.cc/XqpbQKwK/kr-l.png"} alt={piece} style={{ width: 100, height: 100 }} />}}
+      {piece !== "" && !isSelected ? (
+        <img
+          src={imageURL}
+          alt={piece}
+          style={{ width: "100%", height: "100%", zIndex: 100 }}
+        />
+      ) : (
+        id
+      )}
     </div>
   );
 };

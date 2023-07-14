@@ -150,6 +150,29 @@ export function isEqual(obj1, obj2) {
   return true;
 }
 
+export const getPieceImage = (piece, imageObj) => {
+ 
+  try {
+    if (piece === "" || piece === undefined || piece === null) {
+      return;
+    }
+
+    const letter = piece[0].toLowerCase();
+    const matchingPiece = Object.values(imageObj).find((pieceObj) => {
+      return pieceObj.firstLetter.toLowerCase() === letter;
+    });
+
+    if (!matchingPiece) {
+      return;
+    }
+   return matchingPiece[piece.toLowerCase() === piece ? "black" : "white"]
+    
+  } catch (error) {
+    console.log(error);
+  }
+
+}
+
   //  
  // const simulateMove = (gameRepresentation, from, to, piece, player) => {
   //   const clonedGameRepresentation = JSON.parse(

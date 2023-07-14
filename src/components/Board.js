@@ -23,7 +23,8 @@ import {
 import { defaultBoardState } from "./BoardStates";
 import InformationPanel from "./InformationPanel";
 import TimeContext from "../Context";
-const Board = ({ height, width, player, setPlayer }) => {
+import PieceSelection from "./MovingPiece";
+const Board = ({ height, width, player, setPlayer, playersJoined }) => {
   const [gameRepresentation, setGameRepresentation] = useState(defaultBoardState);
   const [enPassantPlayed, setEnpassantPlayed] = useState(false);
   const [playerCastled, setPlayerCastled] = useState(false);
@@ -46,8 +47,8 @@ const Board = ({ height, width, player, setPlayer }) => {
   const [gameFinnshed, setGameFinnnished] = useState(false);
   useEffect(() => {
     setTimeout(() => {
-      console.log(player);
-      if (player === null && player !== "black") {
+      console.log(player, playersJoined);
+      if (player === null && player !== "black" && playersJoined !== undefined) {
         setPlayer("black");
       }
     }, 1000);
@@ -282,7 +283,7 @@ const Board = ({ height, width, player, setPlayer }) => {
 
     setPawnToEvolveIndex(backRankPawnIndex);
     setPossibleMoves([]);
-    setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
+    // setSelectedCell((prevstate) => ({ id: null, piece: null, curPlayer: null }));
   };
 
   const processPieceSelection = (id, piece, curPlayer, forbiddenMovement) => {
@@ -340,7 +341,7 @@ const Board = ({ height, width, player, setPlayer }) => {
     setGameHistory((prevHistory) => {
       let updatedHistory = [...prevHistory];
       for (let i = 0; i < updatedHistory.length - 1; i++) {
-        console.log(updatedHistory[i], updatedHistory[i + 1], isEqual(updatedHistory[i], updatedHistory[i + 1]));
+        // console.log(updatedHistory[i], updatedHistory[i + 1], isEqual(updatedHistory[i], updatedHistory[i + 1]));
         if (isEqual(updatedHistory[i], updatedHistory[i + 1])) {
           updatedHistory.splice(i, 1);
         }
@@ -351,11 +352,35 @@ const Board = ({ height, width, player, setPlayer }) => {
 
   return (
     <div className="game-screen" style={{ background: gameFinnshed ? "red" : "white" }}>
-      <TimeContext.Provider value={{ whiteTime, blackTime }}>
-        <div>
-          {player === curPlayer && <h1>YOUR TURN</h1>}
-          <div id="table">
-            {gameRepresentation &&
+      {player && (
+        <TimeContext.Provider value={{ whiteTime, blackTime }}>
+            <div>
+        {player === curPlayer && <h1>YOUR TURN</h1>}
+        <div id="table">
+          {gameRepresentation &&
+            (player === "black" ? // Reverse rendering order for black player
+              Array.from({ length: height }).reverse().map((_, i) =>
+                Array.from({ length: width }).reverse().map((_, j) => {
+                  const index = (height - 1 - i) * width + (width - 1 - j);
+                  const isGray = (i + j) % 2 === 1;
+                  const piece = gameRepresentation[height - 1 - i][width - 1 - j];
+                  const isSelected = selectedCell.id === index;
+                  const isHighlighted = possibleMoves.includes(index);
+
+                  return (
+                    <Cell
+                      key={index}
+                      id={index}
+                      piece={piece}
+                      isGray={isGray}
+                      isSelected={isSelected}
+                      isHighlighted={isHighlighted}
+                      onClick={processGameMove}
+                    />
+                  );
+                })
+              )
+              :
               Array.from({ length: height }).map((_, i) =>
                 Array.from({ length: width }).map((_, j) => {
                   const index = i * width + j;
@@ -376,34 +401,39 @@ const Board = ({ height, width, player, setPlayer }) => {
                     />
                   );
                 })
-              )}
-          </div>
+              )
+            )
+          }
         </div>
-        <InformationPanel
-          selectedCell={selectedCell}
-          curPlayer={curPlayer}
-          inCheck={inCheck}
-          gameHistory={gameHistory}
-          capturedPieces={capturedPieces}
-          whiteTime={whiteTime}
-          blackTime={blackTime}
-        />
+      </div>
+          <InformationPanel
+            selectedCell={selectedCell}
+            curPlayer={curPlayer}
+            inCheck={inCheck}
+            gameHistory={gameHistory}
+            capturedPieces={capturedPieces}
+            whiteTime={whiteTime}
+            blackTime={blackTime}
+          />
 
-        <EvolvePawnPanel
-          pawnToEvolveIndex={pawnToEvolveIndex}
-          gameRepresentation={gameRepresentation}
-          curPlayer={curPlayer}
-          setMovedPieces={setMovedPieces}
-          movedPieces={movedPieces}
-          setGameRepresentation={setGameRepresentation}
-          setPawnToEvolveIndex={setPawnToEvolveIndex}
-          gameHistory={gameHistory}
-          sendTurn={sendTurn}
-        />
+          <EvolvePawnPanel
+            pawnToEvolveIndex={pawnToEvolveIndex}
+            gameRepresentation={gameRepresentation}
+            curPlayer={curPlayer}
+            setMovedPieces={setMovedPieces}
+            movedPieces={movedPieces}
+            setGameRepresentation={setGameRepresentation}
+            setPawnToEvolveIndex={setPawnToEvolveIndex}
+            gameHistory={gameHistory}
+            sendTurn={sendTurn}
+          />
+          {typeof player == "string"  && <p>you play as: {player}</p>}
+           <PieceSelection selectedCell={selectedCell} /> 
 
-        {/* <button onClick={() => restartGame()}>RESTART</button> */}
-        {/* Your component hierarchy */}
-      </TimeContext.Provider>
+          {/* <button onClick={() => restartGame()}>RESTART</button> */}
+          {/* Your component hierarchy */}
+        </TimeContext.Provider>
+      )}
     </div>
   );
 };
