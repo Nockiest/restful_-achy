@@ -32,7 +32,7 @@ export const EvolvePawnPanel = ({
       // No pawns on the backrank, update the game representation and set the current player
       setGameRepresentation(updatedGameRepresentation);
       console.log("sending turn");
-       sendTurn( gameHistory, gameRepresentation);
+      sendTurn(gameHistory, gameRepresentation);
 
       setPawnToEvolveIndex(false);
       setMovedPieces((movedPieces) => {
@@ -45,7 +45,7 @@ export const EvolvePawnPanel = ({
       console.log("There are still pawns on the backrank. Cannot switch player yet.");
     }
   };
-  
+
   return (
     <div className="evolve-pawn-panel">
       {typeof pawnToEvolveIndex == "number" && pawnToEvolveIndex >= 0 && (
@@ -65,14 +65,14 @@ export const pawnReachedBackRank = (gameRepresentation) => {
 
   for (let col = 0; col < gameRepresentation[backranks.white].length; col++) {
     const piece = gameRepresentation[backranks.white][col];
-// // console.log(
-//   piece.charAt(0).toLowerCase(),
-//   piece.charAt(0).toLowerCase() === "p",
-//   backranks.white * 8 + col,
-//   gameRepresentation,
-//   gameRepresentation[backranks.white],
-//   gameRepresentation[backranks.white][col]
-// );
+    // // console.log(
+    //   piece.charAt(0).toLowerCase(),
+    //   piece.charAt(0).toLowerCase() === "p",
+    //   backranks.white * 8 + col,
+    //   gameRepresentation,
+    //   gameRepresentation[backranks.white],
+    //   gameRepresentation[backranks.white][col]
+    // );
     if (piece.charAt(0).toLowerCase() === "p") {
       return backranks.white * 8 + col; // Return the index of the pawn
     }

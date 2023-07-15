@@ -10,20 +10,30 @@
   
   .str-chat__list {
     background-color: white;
+    
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     padding: 5px;
-    height: 300px;
-    width: 300px;
+    
+     width: 100vw;  
     overflow: hidden;
-    overflow-y: scroll;
+    overflow-x: scroll;
   }
-  
+  .str-chat__reverse-infinite-scroll{
+    display: flex;
+    justify-content: row;
+  }
   .str-chat__list ul {
     list-style-type: none;
     margin: 5px;
     padding: 0;
+    display: flex;
+    justify-content: row;
+    gap: 16px;
     font-family: Arial, Helvetica, sans-serif;
+  }
+  .str-chat__list ul > * {
+   padding: 16px;
   }
   .str-chat__list li {
     list-style-type: none;
@@ -61,10 +71,11 @@
   
   .str-chat__input-flat {
     width: 310px;
-    height: 200px;
+    height: 100px;
     background-color: lightgrey;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
+    margin: 0 auto;
   }
   
   .str-chat__input-flat-wrapper {
@@ -106,26 +117,28 @@
   
   .str-chat__message-reactions-list {
     display: flex;
+    gap: 8px;
   }
   
   .str-chat__reaction-list--counter {
     display: none;
   }
   .str-chat__reaction-list--reverse button {
-    margin-left: 10px;
+    /* margin-left: 10px; */
     border: none;
     background-color: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
   }
+  /* .str-chat__message-reactions-host */
   
   .str-chat__message-reactions-list-item {
-    margin-left: 10px;
+    /* margin-left: 10px; */
     border: none;
-    border-radius: 50vw;
-    width: 30px;
-    height: 30px;
+    /* border-radius: 50vw; */
+    /* width: 30px;
+    height: 30px; */
   }
   .str-chat__message-reactions-list-item span {
     display: flex;

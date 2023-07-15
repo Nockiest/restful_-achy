@@ -8,7 +8,7 @@ const SignIn = ({setIsAuth}) => {
   const signUp = () => {
     
     Axios.post("http://localhost:3001/signup", user).then ( res => {
-      console.log("x")
+   
       const {token, userId, firstName, lastName, username, hashedPassword} = res.data
       cookies.set("token", token);
       cookies.set("userId", userId);
@@ -23,7 +23,7 @@ const SignIn = ({setIsAuth}) => {
   }
 
   return (
-    <div className="signUp">
+    <div className="signUp form-container">
         <label> Sign Up</label>
         <input placeholder='First Name' onChange={(event) => {
             setUser({...user, firstName: event.target.value})

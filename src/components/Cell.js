@@ -19,7 +19,7 @@ const Cell = (props) => {
     try {
      
       const pieceImg = getPieceImage(piece, pieces)
-      console.log(pieceImg)
+      // console.log(pieceImg)
       setImageURL(pieceImg);
     } catch (error) {
       console.log(error);
@@ -37,7 +37,7 @@ const Cell = (props) => {
         <img
           src={imageURL}
           alt={piece}
-          style={{ width: "100%", height: "100%", zIndex: 100 }}
+          style={{ zIndex: 100 }}
         />
       ) : (
         id

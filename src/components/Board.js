@@ -20,12 +20,12 @@ import {
   findIfCastled,
   isEqual,
 } from "../utils";
-import { defaultBoardState } from "./BoardStates";
+import { defaultBoardState, forEnPassant, kingCastlingPosition } from "./BoardStates";
 import InformationPanel from "./InformationPanel";
 import TimeContext from "../Context";
 import PieceSelection from "./MovingPiece";
-const Board = ({ height, width, player, setPlayer, playersJoined }) => {
-  const [gameRepresentation, setGameRepresentation] = useState(defaultBoardState);
+const Board = ({ height, width, player, setPlayer, playersJoined, gameStopped }) => {
+  const [gameRepresentation, setGameRepresentation] = useState(forEnPassant);
   const [enPassantPlayed, setEnpassantPlayed] = useState(false);
   const [playerCastled, setPlayerCastled] = useState(false);
   const [inCheck, setInCheck] = useState(false);
@@ -47,12 +47,17 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
   const [gameFinnshed, setGameFinnnished] = useState(false);
   useEffect(() => {
     setTimeout(() => {
-      console.log(player, playersJoined);
+      // console.log(player, playersJoined);
       if (player === null && player !== "black" && playersJoined !== undefined) {
         setPlayer("black");
       }
     }, 1000);
   }, [player]);
+  useEffect(() => {
+   if(gameStopped){
+    restartGame()
+   }
+  }, [gameStopped])
   useEffect(() => {
     const interval = setInterval(() => {
       if (curPlayer === "white") {
@@ -82,13 +87,14 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
   const sendTurn = async (updatedGameHistory, gameRepresentation) => {
     await setCurPlayer(curPlayer === "white" ? "black" : "white");
     await setCallCount((prev) => prev + 1);
-    console.log(callCount);
+    // console.log(callCount);
 
     await channel.sendEvent({
       type: "game-move",
       data: { newTurn: updatedGameHistory[updatedGameHistory.length - 1], gameRepresentation },
     });
   };
+
   const announceGameWin = async (winner, state) => {
     setGameFinnnished(true);
     await channel.sendEvent({
@@ -109,7 +115,6 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
     return () => {
       unmounted = true; // Update the flag to indicate unmounting
     };
-    console.log(player);
   }, []);
 
   const initializeMovedPieces = () => {
@@ -127,7 +132,7 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
   }, []);
 
   const restartGame = () => {
-    setGameRepresentation(defaultBoardState);
+    setGameRepresentation(forEnPassant);
     setEnpassantPlayed(false);
     setPlayerCastled(false);
     setInCheck(false);
@@ -143,17 +148,13 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
     setPossibleMoves([]);
     setGameHistory([]);
     setPawnToEvolveIndex(null);
-    // setPlayedMoves(0);
   };
 
   const processGameMove = async (clickPos, piece) => {
-    if (gameFinnshed || player !== curPlayer) {
+    if (gameFinnshed || player !== curPlayer || pawnToEvolveIndex > 0) {
       return;
     }
-    console.log(pawnToEvolveIndex);
-    if (pawnToEvolveIndex > 0) {
-      return;
-    }
+
     // console.log(selectedCell,selectedCell.id === clickPos,selectedCell.id)
     //***   Player deselcted piece  by cclicking on a piece of the same color */
     if (selectedCell.id !== null && pieceColor(piece) === curPlayer) {
@@ -172,49 +173,48 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
       return;
     }
 
-    const forbiddenMovement = checkWhatGetsPlayerInCheck(
-      gameRepresentation,
-      curPlayer,
-      gameHistory,
-      movedPieces,
-      inCheck
-    );
+    // const forbiddenMovement = checkWhatGetsPlayerInCheck(
+    //   gameRepresentation,
+    //   curPlayer,
+    //   gameHistory,
+    //   movedPieces,
+    //   inCheck
+    // );
 
-    await setIllegalMoves(forbiddenMovement);
+    // await setIllegalMoves(forbiddenMovement);
     // console.log(forbiddenMovement);
-    if (forbiddenMovement.includes("king stands in check now")) {
-      await setInCheck((prevCheck) => {
-        console.log("prevCheck:", prevCheck); // Updated value
-        return true;
-      });
+    // if (forbiddenMovement.includes("king stands in check now")) {
+    //   await setInCheck(true);
 
-      const canEscape = determineMate(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
-      if (!canEscape) {
-        console.log(canEscape);
-        // announceGameWin(curPlayer, "won")
-      }
-      console.log("canEscape: ", canEscape);
-    } else {
-      await setInCheck(false);
-      const canMove = determineDraw(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
-      console.log("can he move something? ", canMove);
-      if (!canMove) {
-        console.log("IS DRAW?", canMove);
-        announceGameWin(curPlayer, "tie");
-      }
-    }
+    //   const canEscape = determineMate(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
+    //   if (!canEscape) {
+    //     console.log(canEscape);
+    //     // announceGameWin(curPlayer, "won")
+    //   }
+    //   console.log("canEscape: ", canEscape);
+    // } else {
+    //   await setInCheck(false);
+    //   const canMove = determineDraw(gameRepresentation, curPlayer, gameHistory, movedPieces, inCheck);
+    //   console.log("can he move something? ", canMove);
+    //   if (!canMove) {
+    //     console.log("IS DRAW?", canMove);
+    //     announceGameWin(curPlayer, "tie");
+    //   }
+    // }
 
     // ****** check if players piece was selected
     const selectedPieceColor = pieceColor(piece);
-    if (selectedPieceColor !== curPlayer || selectedPieceColor === null) return console.log(selectedPieceColor);
+    if (selectedPieceColor !== curPlayer || selectedPieceColor === null) return;
 
     // ******select the piece
+    if (piece == "") {
+      return;
+    }
+    let forbiddenMovement = []; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     processPieceSelection(clickPos, piece, curPlayer, forbiddenMovement);
 
     // Find the selected piece in the movedPieces array and set its value to true
     setMovedPieces((prevState) => {
-      console.log(piece);
-
       return { ...prevState, [piece]: true };
     });
   };
@@ -244,40 +244,41 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
     setCapturedPieces((prevPieces) => [...prevPieces, capturedPiece]);
 
     let capturedByEnPassant = checkEnPassantWasPlayed(curPlayer === "white" ? "white" : "black", lastTurn, moveDetails);
-
+    console.log(capturedByEnPassant);
     if (capturedByEnPassant) {
       const capturedPiece = gameRepresentation.flat()[capturedByEnPassant];
 
       setCapturedPieces((prevPieces) => [...prevPieces, capturedPiece]);
 
+      await setGameHistory((prevHistory) => {
+        let newHistory = [...prevHistory]; // Create a new array to avoid mutating the original array
+        let last = newHistory[newHistory.length - 1];
+        console.log(capturedByEnPassant, prevHistory ,last, gameRepresentation.flat()[capturedByEnPassant] );
+      
+        // Check if `last` exists and has a `captured` property before modifying it
+        if (last && typeof last === "object") {
+          last.captured = gameRepresentation.flat()[capturedByEnPassant];
+          console.log(last, newHistory);
+          newHistory[newHistory.length - 1] = last;
+        }
+      
+        return newHistory;
+      });
       await setGameRepresentation((prevRepresentation) => {
         const flattenedRepresentation = prevRepresentation.flat();
-        const newGamerep = [];
-
-        for (let i = 0; i < flattenedRepresentation.length; i += 8) {
-          const row = flattenedRepresentation.slice(i, i + 8);
-          for (let j = 0; j < row.length; j++) {
-            if (i + j === capturedByEnPassant) {
-              newGamerep.push("");
-            } else {
-              newGamerep.push(row[j]);
-            }
-          }
-        }
-
-        const updatedRepresentation = [];
-        for (let i = 0; i < newGamerep.length; i += 8) {
-          updatedRepresentation.push(newGamerep.slice(i, i + 8));
-        }
+        flattenedRepresentation[capturedByEnPassant] = "";
+        const divideIntoArrays = (flattenedRepresentation, height) => {
+          return Array.from({ length: height }, (_, i) => flattenedRepresentation.slice(i * height, (i + 1) * height));
+        };
+        const updatedRepresentation = divideIntoArrays(flattenedRepresentation, height);
 
         return updatedRepresentation;
       });
+     
     }
     const backRankPawnIndex = pawnReachedBackRank(gameRepresentation);
-    // console.log(backRankPawnIndex);
-    console.log(backRankPawnIndex);
+
     if (backRankPawnIndex < 0) {
-      console.log("switching player");
       sendTurn(updatedGameHistory, gameRepresentation);
     }
 
@@ -302,7 +303,6 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
         return move;
       }
       const illegalMove = forbiddenMovement?.find((illegal) => {
-        // console.log(illegal, illegal.move, move, illegal.piece === piece, illegal.move === move);
         return illegal.piece === piece && illegal.move === move;
       });
       return !illegalMove; // Exclude any move that matches an illegal move
@@ -317,7 +317,6 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
       const { newTurn, gameRepresentation } = event.data;
       setCurPlayer((prevPlayer) => (prevPlayer === "white" ? "black" : "white"));
 
-      // Delay the execution for 2 seconds
       setGameRepresentation(gameRepresentation);
       setGameHistory((prevHistory) => {
         let updatedHistory = [...prevHistory, newTurn];
@@ -326,7 +325,19 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
             updatedHistory.splice(i, 1);
           }
         }
-        console.log(updatedHistory);
+        if (newTurn.captured) {
+          const capturedPieceIndex = gameRepresentation.flat().findIndex((piece) => piece === newTurn.captured);
+          if (capturedPieceIndex !== -1) {
+            const flattenedGameRepresentation = gameRepresentation.flat();
+            flattenedGameRepresentation[capturedPieceIndex] = ""; // Set the captured piece to an empty string
+            const updatedGameRepresentation = [];
+            for (let i = 0; i < flattenedGameRepresentation.length; i += 8) {
+              updatedGameRepresentation.push(flattenedGameRepresentation.slice(i, i + 8));
+            }
+            setGameRepresentation(updatedGameRepresentation);
+          }
+        }
+        // console.log(updatedHistory);
         return updatedHistory;
       });
     }
@@ -353,59 +364,60 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
   return (
     <div className="game-screen" style={{ background: gameFinnshed ? "red" : "white" }}>
       {player && (
-        <TimeContext.Provider value={{ whiteTime, blackTime }}>
-            <div>
-        {player === curPlayer && <h1>YOUR TURN</h1>}
-        <div id="table">
-          {gameRepresentation &&
-            (player === "black" ? // Reverse rendering order for black player
-              Array.from({ length: height }).reverse().map((_, i) =>
-                Array.from({ length: width }).reverse().map((_, j) => {
-                  const index = (height - 1 - i) * width + (width - 1 - j);
-                  const isGray = (i + j) % 2 === 1;
-                  const piece = gameRepresentation[height - 1 - i][width - 1 - j];
-                  const isSelected = selectedCell.id === index;
-                  const isHighlighted = possibleMoves.includes(index);
+        <TimeContext.Provider value={{ whiteTime, blackTime,player }}>
+          <div>
+            <h1>  {player === curPlayer?  "YOUR TURN": "Please wait for your opponent"}</h1> 
+            <div id="table">
+              {gameRepresentation &&
+                (player === "black" // Reverse rendering order for black player
+                  ? Array.from({ length: height })
+                      .reverse()
+                      .map((_, i) =>
+                        Array.from({ length: width })
+                          .reverse()
+                          .map((_, j) => {
+                            const index = (height - 1 - i) * width + (width - 1 - j);
+                            const isGray = (i + j) % 2 === 1;
+                            const piece = gameRepresentation[height - 1 - i][width - 1 - j];
+                            const isSelected = selectedCell.id === index;
+                            const isHighlighted = possibleMoves.includes(index);
 
-                  return (
-                    <Cell
-                      key={index}
-                      id={index}
-                      piece={piece}
-                      isGray={isGray}
-                      isSelected={isSelected}
-                      isHighlighted={isHighlighted}
-                      onClick={processGameMove}
-                    />
-                  );
-                })
-              )
-              :
-              Array.from({ length: height }).map((_, i) =>
-                Array.from({ length: width }).map((_, j) => {
-                  const index = i * width + j;
-                  const isGray = (i + j) % 2 === 1;
-                  const piece = gameRepresentation[i][j];
-                  const isSelected = selectedCell.id === index;
-                  const isHighlighted = possibleMoves.includes(index);
+                            return (
+                              <Cell
+                                key={index}
+                                id={index}
+                                piece={piece}
+                                isGray={isGray}
+                                isSelected={isSelected}
+                                isHighlighted={isHighlighted}
+                                onClick={processGameMove}
+                              />
+                            );
+                          })
+                      )
+                  : Array.from({ length: height }).map((_, i) =>
+                      Array.from({ length: width }).map((_, j) => {
+                        const index = i * width + j;
+                        const isGray = (i + j) % 2 === 1;
+                        const piece = gameRepresentation[i][j];
+                        const isSelected = selectedCell.id === index;
+                        const isHighlighted = possibleMoves.includes(index);
 
-                  return (
-                    <Cell
-                      key={index}
-                      id={index}
-                      piece={piece}
-                      isGray={isGray}
-                      isSelected={isSelected}
-                      isHighlighted={isHighlighted}
-                      onClick={processGameMove}
-                    />
-                  );
-                })
-              )
-            )
-          }
-        </div>
-      </div>
+                        return (
+                          <Cell
+                            key={index}
+                            id={index}
+                            piece={piece}
+                            isGray={isGray}
+                            isSelected={isSelected}
+                            isHighlighted={isHighlighted}
+                            onClick={processGameMove}
+                          />
+                        );
+                      })
+                    ))}
+            </div>
+          </div>
           <InformationPanel
             selectedCell={selectedCell}
             curPlayer={curPlayer}
@@ -427,11 +439,8 @@ const Board = ({ height, width, player, setPlayer, playersJoined }) => {
             gameHistory={gameHistory}
             sendTurn={sendTurn}
           />
-          {typeof player == "string"  && <p>you play as: {player}</p>}
-           <PieceSelection selectedCell={selectedCell} /> 
-
-          {/* <button onClick={() => restartGame()}>RESTART</button> */}
-          {/* Your component hierarchy */}
+          {typeof player == "string" && <p>you play as: {player}</p>}
+          <PieceSelection selectedCell={selectedCell} />
         </TimeContext.Provider>
       )}
     </div>

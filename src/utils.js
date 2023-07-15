@@ -35,20 +35,27 @@ export const findKings = (gameRepresentation) => {
 
 
   export function checkEnPassantWasPlayed( playerColor, lastTurn, thisTurn){
-    //  console.log(playerColor, lastTurn, thisTurn)
+    console.log(playerColor, lastTurn, thisTurn)
     if(!lastTurn|| lastTurn.length === 0){return  false}
-    // console.log("D")
-    if(lastTurn.piece.toLowerCase() !== "p"){return false}
-    console.log("D")
+      console.log("D1", lastTurn.piece[0].toLowerCase())
+    if(lastTurn.piece[0].toLowerCase() !== "p"){return false}
+    console.log("D2",lastTurn.captured )
     if (lastTurn.captured !== ""){ return false }
-    // console.log("D", Math.abs(lastTurn.from - lastTurn.to))
+    console.log("D3", Math.abs(lastTurn.from - lastTurn.to))
     if(Math.abs(lastTurn.from - lastTurn.to) !== 16){return false}
-    // console.log("D")
+      console.log("D4",Math.abs(thisTurn.from - thisTurn.to))
     if(Math.abs(thisTurn.from - thisTurn.to) !== 9 && Math.abs(thisTurn.from - thisTurn.to) !== 7 ) {return false }
-    // console.log("D5", thisTurn.piece.toLowerCase())
-    if(thisTurn.piece.toLowerCase() !== "p"){return false}
-   // console.log("passed")
+      console.log("D5", thisTurn.piece[0].toLowerCase())
+    if(thisTurn.piece[0].toLowerCase() !== "p"){return false}
+    console.log("passed")
     let capturedPiecePos = playerColor === "white" ? lastTurn.from + 16 : lastTurn.from -16
+    let isAcrossEdge = Math.floor(lastTurn.from / 8) !== Math.floor(capturedPiecePos / 8);
+    console.log(isAcrossEdge)
+    if (isAcrossEdge) {
+      
+      return false;
+    }
+    
     console.log("ENPASSANR CAPTURED PUECE IS " + capturedPiecePos)
     return capturedPiecePos
   
@@ -100,8 +107,8 @@ export const findIfCastled = (   selectedId, id, selectedPiece) => {
         
         const updatedGameRepresentation = [...gameRepresentation];
         updatedGameRepresentation[Math.floor(rookStartPosition / 8)][rookStartPosition % 8] = "";
-        updatedGameRepresentation[Math.floor(rookFinalPosition / 8)][rookFinalPosition % 8] = pieceColor(selectedPiece) === "white" ? "Rr2" : "Rl2";
-        
+        updatedGameRepresentation[Math.floor(rookFinalPosition / 8)][rookFinalPosition % 8] = pieceColor(selectedPiece) === "white" ?  id > selectedId? "Rr2" : "Rl2":id > selectedId? "rr1":"rl1";
+        // here i am hardcoding the number of the rook to one, technically a mistake
         return updatedGameRepresentation;
       }
     }

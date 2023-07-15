@@ -5,7 +5,7 @@ export const determineMate = (board, checkedPlayer,gameHistory,movedPieces,inChe
     //get players pieces on the board
     const playerPieces = getPlayerPieces(board, checkedPlayer);
      //for every one of them find legal moves
-    // console.log(playerPieces)
+   
      // check if they get the king out of mate
      for (let i = 0; i < playerPieces.length; i++) {
         const { piece, pieceIndex } = playerPieces[i];

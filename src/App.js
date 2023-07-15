@@ -56,7 +56,7 @@ if (token) {
         </Chat> 
       </div> 
        :
-      <div>
+      <div className="authentication-forms">
       <Login setIsAuth={setIsAuth} />
       <SignIn setIsAuth={setIsAuth}/>
       </div> 

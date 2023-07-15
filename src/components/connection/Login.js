@@ -22,7 +22,7 @@ const Login = ({setIsAuth}) => {
   };
 
     return (
-        <div className="login">
+        <div className="login form-container">
           <label> Login</label>
     
           <input

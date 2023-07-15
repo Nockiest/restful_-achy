@@ -38,9 +38,9 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
   }
 
   // En passant calculation
-  const enPassantLeft = pieceColor === "white" ? position - 9 : position + 7;
+  const enPassantLeft = pieceColor === "white" ? position - 9 : position + 9;
   const enPassantLeftCapture = pieceColor === "white" ? position - 1 : position + 1;
-  const enPassantRight = pieceColor === "white" ? position - 7 : position + 9;
+  const enPassantRight = pieceColor === "white" ? position - 7 : position + 7;
   const enPassantRightCapture = pieceColor === "white" ? position + 1 : position - 1;
   if (isEnPassantPossible(enPassantLeft, enPassantLeftCapture, pieceColor, board, lastTurn)) {
     possibleMoves.push(enPassantLeft);
@@ -63,6 +63,7 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
   };
   
   const isCapturePossible = (position, pieceColor, board, curPosition) => {
+    
     if (position >= 0 && position < 64) {
       const piece = board[position];
       const attackedPieceColor = piece.toLowerCase() === piece ? 'black' : 'white';
@@ -79,21 +80,23 @@ const calculatePawnMoves = (position, pieceColor, board, lastTurn) => {
     return false;
   };
   const isEnPassantPossible = (enPassantTo, enPassantCapture, playerColor, board, lastTurn) => {
-    // console.log(enPassantTo, enPassantCapture, playerColor, board, lastTurn)
+    
+ 
+    //  console.log(enPassantTo, enPassantCapture, playerColor, board, lastTurn)
     if (enPassantTo >= 0 && enPassantTo < 64 && lastTurn) {
       
-      const piece = board[enPassantTo];
+      const piece = board[enPassantCapture];
       const lastPiece = lastTurn.piece;
       const lastFrom = lastTurn.from;
       const lastTo = lastTurn.to;
-      const attackedPiecColor = piece.toLowerCase() === piece ? 'black' : 'white';
-      // console.log(piece === "", attackedPiecColor, pieceColor)
+      const attackedPiecColor = pieceColor(piece)
+      // console.log(piece === "", attackedPiecColor , board[enPassantCapture], enPassantCapture, lastTurn)
       if (piece === "" && attackedPiecColor !== playerColor, board[enPassantCapture]) {
       //    console.log( lastFrom , enPassantTo +8, enPassantCapture )
-      //   console.log(lastPiece === "p" ,playerColor === "white" ,lastFrom === enPassantTo + 8 ,lastTo === enPassantCapture  )
-      //   console.log(lastPiece === "P" ,playerColor === "black" , lastFrom === enPassantTo - 8,lastTo === enPassantCapture )
-      // console.log(pieceColor)
-        // console.log(pieceColor(lastPiece) === playerColor)
+      //   console.log(lastPiece[0] === "p" ,playerColor === "white" ,lastFrom,enPassantTo,lastFrom === enPassantTo - 8 ,lastTo === enPassantCapture  )
+      //    console.log(lastPiece[0] === "P" ,playerColor === "black" ,lastFrom,enPassantTo, lastFrom === enPassantTo +  8,lastTo === enPassantCapture )
+      
+      //  console.log(pieceColor(lastPiece) === playerColor)
         if (pieceColor(lastPiece)!== playerColor && Math.abs(lastFrom - enPassantTo)===  8 && lastTo === enPassantCapture  ) {
           
           return true;

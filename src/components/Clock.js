@@ -1,18 +1,41 @@
-import   { useContext } from "react";
+import { useContext } from "react";
 import TimeContext, { WinAnnounceContext } from "../Context";
 const Clock = () => {
   const contextValue = useContext(TimeContext);
 
   // Access the specific values from the context
-  const { whiteTime, blackTime } = contextValue;
+  const { whiteTime, blackTime, player } = contextValue;
+
+  const formatTime = (time) => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = time % 60;
+
+    const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
+
+    return formattedTime;
+  };
 
   return (
-    <div className="clock">
-      <div className="clock">
-        <div>Player 1: {whiteTime > 1 ? `${whiteTime} seconds` : "Player run out of time"}</div>
-        <div>Player 2: {blackTime > 1 ? `${blackTime} seconds` : "Player run out of time"}</div>
-      </div>
-    </div>
+    <>
+      {player === "black" ? (
+        <div className="clock">
+          <p>White </p>
+          <div> {whiteTime > 1 ? formatTime(whiteTime) : "Player run out of time"}</div>
+          <div>{blackTime > 1 ? formatTime(blackTime) : "Player run out of time"} </div>
+          <p>Black</p>
+        </div>
+      ) : (
+        <div className="clock">
+          <p>Black </p>
+          <div>{blackTime > 1 ? formatTime(blackTime) : "Player run out of time"} </div>
+          <div> {whiteTime > 1 ? formatTime(whiteTime) : "Player run out of time"}</div>
+          <p> White</p>
+        </div>
+      )}
+    </>
   );
 };
 

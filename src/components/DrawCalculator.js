@@ -5,7 +5,7 @@ export const determineDraw = (board, curPayer,gameHistory, movedPieces,inCheck) 
    // find the players pieces
    const playerPieces = getPlayerPieces(board, curPayer);
 // for every piece find legal moves
-    console.log(playerPieces)
+    // console.log(playerPieces)
 // check if they put the the king in a check
 for (let i = 0; i < playerPieces.length; i++) {
     const { piece, pieceIndex } = playerPieces[i];
@@ -31,10 +31,10 @@ for (let i = 0; i < playerPieces.length; i++) {
     const howIsKingAttacked = isKingInCheck(newKingPos, curPayer, dummyBoard, gameHistory,movedPieces, inCheck)
  
     if ( howIsKingAttacked) {
-          console.log(
-           `Move ${potentialMove   }  ${ pieceIndex}${ piece}  ${howIsKingAttacked.enemy}   results in check.`  
-          );
-          console.log(dummyBoard)
+          // console.log(
+          //  `Move ${potentialMove   }  ${ pieceIndex}${ piece}  ${howIsKingAttacked.enemy}   results in check.`  
+          // );
+          // console.log(dummyBoard)
       } else {
         canMove = true
         break

@@ -1,4 +1,4 @@
-export let defaultBoardState =   [
+export const defaultBoardState =   [
 ["rl1", "n1", "b1", "q1", "k1", "b2", "n2", "rr2"],
 ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8"],
 ["", "", "", "", "", "", "", ""],
@@ -9,7 +9,19 @@ export let defaultBoardState =   [
 ["Rl1", "N1", "B1", "Q1", "K1", "B2", "N2", "Rr2"]
 ] 
 
-export let kingCastlingPosition = [
+export const forEnPassant =   [
+    ["rl1", "n1", "b1", "q1", "k1", "b2", "n2", "rr2"],
+    ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8"],
+    ["", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "p9", "", ""],
+    ["", "", "", "", "", "", "P3", ""],
+    ["", "", "", "", "", "", "", ""],
+    ["P1", "P2", "", "P4", "P5", "P6", "P7", "P8"],
+    ["Rl1", "N1", "B1", "Q1", "K1", "B2", "N2", "Rr2"]
+    ] 
+    
+
+export const kingCastlingPosition = [
     ["rl1", "", "", "", "k1", "", "", "rr2"],
     ["q1", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", ""],
