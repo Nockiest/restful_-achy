@@ -7,15 +7,36 @@ const Game = ({ channel, setChannel, client }) => {
   const [result, setResult] = useState({ winner: "none", state: "none" });
   const [player, setPlayer] = useState(null);
   const [gameStopped, setGameStopped] = useState(false);
+  
+  const askForNewGame = async () => {
+    await channel.sendEvent({ type: "ask-for-new-game" });
+  };
+
   useEffect(() => {
     const handleUserWatchingStop = (event) => {
       if (channel.state.watcher_count !== 2) {
-        alert("opponent left the game")
-        
+        alert("Opponent left the game");
         channel.stopWatching();
-       
         setChannel(null);
-        
+      }
+    };
+
+    const handleAskForNewGame = async (senderName) => {
+      console.log("event fired",senderName?.user?.name, client?.user?.name)
+       if(senderName?.user?.name ===client?.user?.name){return console.log("sender")}
+      const response = window.confirm("Opponent has requested a new game. Do you want to start a new game?");
+    console.log("confirmed", response)
+      await channel.sendEvent({ type: "new-game-response",  data: response });
+    };
+
+    const handleNewGameResponse = (event) => {
+     console.log(event, event.data)
+      const { data  } = event;
+      if (data) {
+        // Restart the game
+        setResult({ winner: "none", state: "none" });
+        console.log("LETS START A NEW GAME");
+        channel.sendEvent({ type: "user-restarted-game", data: { restarted: true } });
       }
     };
 
@@ -31,14 +52,20 @@ const Game = ({ channel, setChannel, client }) => {
     channel.on("game-won", (event) => {
       setResult({ winner: event.data.winner, state: "won" });
     });
-
+     
     channel.on("user.watching.stop", handleUserWatchingStop);
+    channel.on("ask-for-new-game", handleAskForNewGame);
 
+    channel.on("new-game-response", handleNewGameResponse);
     return () => {
-      setGameStopped(true)
+      setGameStopped(true);
       channel.off("user.watching.stop", handleUserWatchingStop);
+      channel.off("ask-for-new-game", handleAskForNewGame);
+      channel.off("new-game-response", handleNewGameResponse);
     };
   }, [channel, setChannel]);
+
+   
 
   if (!playersJoined) {
     return <h1>Waiting for the other player...</h1>;
@@ -56,7 +83,7 @@ const Game = ({ channel, setChannel, client }) => {
         >
           Leave Game
         </button>
-        <button>Restart Game</button>
+        <button onClick={askForNewGame}>Ask for a new game</button>
       </div>
       <Board
         result={result}

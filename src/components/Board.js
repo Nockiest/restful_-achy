@@ -347,7 +347,7 @@ const Board = ({ height, width, player, setPlayer, playersJoined, gameStopped })
     setGameFinnnished(event);
     await channel.off("game-move");
   });
-
+  // channel.on("user-restarted-game", restartGame());
   useEffect(() => {
     setGameHistory((prevHistory) => {
       let updatedHistory = [...prevHistory];
