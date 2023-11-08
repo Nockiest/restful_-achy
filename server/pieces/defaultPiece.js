@@ -1,20 +1,24 @@
-class Piece {
+export default class Piece {
     constructor(color, index) {
       this.color = color;
       this.index = index
       this.moved = false
-      this.movementComponents = [];
+      this.abreviation = "X"
+      this.movementFunctions = [];
     }
   
     addMovementComponent(component) {
-      this.movementComponents.push(component);
+      this.movementFunctions.push(component);
     }
   
-    canMove(currentPosition, targetPosition) {
-      for (const component of this.movementComponents) {
-        if (component.canMove(currentPosition, targetPosition)) {
-          return true;
+    canMove(targetPosition, board) {
+      for (const movementFunction of this.movementFunctions) {
+        if (movementFunction(this.index, this.color, board  )){
+          return true
         }
+        // if (component.canMove(this.index, targetPosition)) {
+        //   return true;
+        // }
       }
       return false;
     }

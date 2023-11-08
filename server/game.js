@@ -19,9 +19,7 @@ export default class Game {
         return [whitePlayer, blackPlayer];
     }
 
-    get curPlayer() {
-        return this.players[this.curPlayerIndex];
-    }
+    get curPlayer() { return this.players[this.curPlayerIndex]; }
 
     switchPlayer() {
         this.curPlayerIndex = 1 - this.curPlayerIndex; // Toggle between 0 and 1
@@ -38,7 +36,7 @@ export default class Game {
     }
 
     countTime() {
-        console.log("COUNTING TIME");
+        // console.log("COUNTING TIME");
         // Add your time counting logic here
         this.curPlayer.updateTime();
     }
@@ -53,13 +51,22 @@ export default class Game {
             console.log("The game has already started!");
         }
     }
+     
 
+     
     checkMoveValid(from, to) {
-        const fromCellVal = this.grid.getCellAtIndex(from);
-        const toCellVal = this.grid.getCellAtIndex(to);
-        console.log("Making move ", fromCellVal, toCellVal);
+        console.log(from ,to)
+        const fromCell = this.grid.getCellAtIndex(from);
+        if (fromCell.piece === null){
+            console.log("FROM PIECE NULL")
+            return false
+        }
+        const toCell  = this.grid.getCellAtIndex(to);
+        console.log("Making move ", fromCell, toCell );
+        console.log(" MOVE? ",fromCell.piece.canMove )
+        console.log("CAN MOVE? ",fromCell.piece.canMove(to, this.grid))
         // code for checking if movement is valid
-        return fromCellVal && toCellVal; // return if move is valid
+        return fromCell  && toCell ; // return if move is valid
     }
 
     processValidMovement(from, to) {

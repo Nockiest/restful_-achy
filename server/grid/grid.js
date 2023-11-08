@@ -1,22 +1,45 @@
 import Cell from "./cell.js"
+import { checkInGameBounds } from "../utils.js";
+import Piece from "../pieces/defaultPiece.js";
+import Bishop from "../pieces/bishop.js";
 
 export default class Grid {
   constructor(height, width, gameState) {
     this.height = height;
     this.width = width;
-    this.cells = this.createCells(gameState);
+    this.cells = this.createCellsAndPieces(gameState);
+    this.logPieces()
   }
 
-  createCells(gameState) {
+  getPieceFromIdentifier(identifier){
+    // switch statement for getting the correct piece type
+    if (identifier.toLowerCase() === "b"){
+      return Bishop
+    } else{
+      return Piece
+    }
+    
+  }
+
+  createCellsAndPieces(gameState) {
     const cells = [];
     for (let i = 0; i < this.height * this.width; i++) {
-      var newCell = new Cell(i, gameState[i]);
-      cells.push(newCell);
+        var piece = this.getPieceFromIdentifier(gameState[i]);
+        var newPiece = null;
+        var color = null;
+         
+        if (gameState[i]) {
+            console.log("x",gameState[i])
+            color = gameState[i] === gameState[i].toLowerCase() ? 'black' : 'white';
+            newPiece = new piece(color, i);
+        }
+        var newCell = new Cell(i, gameState[i], newPiece);
+        cells.push(newCell);
     }
     return cells;
-  }
+}
 
-  setCellValue(valuearr) {
+  instantiatePieces(valuearr) {
     if (valuearr.length !== this.height * this.width) {
       throw new Error('Setting new cell value with an array of wrong length', valuearr.length);
     }
@@ -24,44 +47,45 @@ export default class Grid {
     // Loop through the cells and set their values based on the array
     this.cells.forEach((cell, index) => {
       cell.setValue(valuearr[index]);
+      cell.piece =  new Piece()
     });
   }
 
   getCellAtIndex(index) {
-    if (index < 0 || index >= this.cells.length) {
-      throw new Error('Index out of bounds');
-    }
-    return this.cells[index];
+    if(checkInGameBounds(index)){return this.cells[index];}
+  }
+  getPieceAtIndex(index){
+    if(checkInGameBounds(index)){return this.cells[index].value}
   }
 
   makeMove(from, to) {
     // Ensure that from and to are valid indices
-    if (from < 0 || from >= this.cells.length || to < 0 || to >= this.cells.length) {
-      throw new Error('Invalid move indices');
+    if (checkInGameBounds(from) && checkInGameBounds(to)  ) {
+      // Get the values at from and to indices
+      const valueFrom = this.cells[from].value 
+      const pieceFrom = this.cells[from].piece
+      // const valueTo = this.cells[to].value
+      // const pieceTo = this.cells[to].piece
+      // Rewrite the value at the "to" index and clear the value at "from" index
+      this.cells[to].value = valueFrom 
+      this.cells[from].value = `` 
+      this.cells[to].piece = pieceFrom 
+      this.cells[from].piece = null 
+      pieceFrom.index = index
+      pieceFrom.moved = true
+      this.logPieces()
     }
 
-    // Get the values at from and to indices
-    const valueFrom = this.cells[from].value//.getValue();
-    const valueTo = this.cells[to].value//.getValue();
-
-    // Rewrite the value at the "to" index and clear the value at "from" index
-    this.cells[to].value = valueFrom 
-    this.cells[from].value = `` 
-
-    // Log the updated grid
-    console.log('Grid after move:', this.cells);
-    // this.logGrid();
-
-    // Return any additional information or status if needed
-    // return {
-    //   message: 'Move successful',
-    //   from: { index: from, value: valueFrom },
-    //   to: { index: to, value: valueTo },
-    // };
+   
   }
 
+   
   logGrid() {
     // Log the grid for debugging purposes
-    console.log(this.cells.map(cell => cell.getValue()));
+    console.log(this.cells.map(cell => cell.value));
+  }
+  logPieces() {
+    // Log the grid for debugging purposes
+    console.log(this.cells.map(cell => cell.piece));
   }
 }

@@ -10,7 +10,7 @@ export default class Player {
 
     updateTime() {
         this.time -= 1;
-        console.log("counting time", this.color, this.time );
+        // console.log("counting time", this.color, this.time );
         if (this.time <= 0) {
             console.log("TIME RAN OUT", this.time);
         }
