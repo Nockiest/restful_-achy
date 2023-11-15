@@ -7,18 +7,21 @@ app.use(cors());
 app.use(express.json())
  
 
-var beginningState = ["r","n","b","k","q","b","n","r","p","p","p","p","p","p","p","p","","","","","","","","b","","","","","","","","","","","","","","","","","","","","","","","","","","P","P","P","P","P","P","P","P","R","N","B","K","Q","B","N","R"];
+var beginningState = ["r","n","b","k","q","b","n","r","p","p","p","p","p","p","p","p","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","P","P","P","P","P","P","P","P","P","R","N","B","K","Q","B","N","R"];
+var game = null 
 
-var game = null //= new Game(beginningState, 600)
+app.post("/create_game", async (req, res) => {
+  game = new Game(beginningState, 600);
 
-app.post("/create_game", async (req, res)  => {
-    // console.log("createing_game ", req)
-    game = new Game(beginningState, 600)
-    res.json({
-      message: "SUCESS",
-      game: game
-    })
-})
+  const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
+
+  res.json({
+    message: 'Success',
+    game: game,
+    board: simplifiedBoard,
+    initialized: game.initialized, // Include the initialization status
+  });
+});
 
 app.post( "/begin_game", async (req, res)  =>{
   if (game){
@@ -26,33 +29,37 @@ app.post( "/begin_game", async (req, res)  =>{
   } else {
     throw new Error (" GAME WANT INITIATED")
   }
-   
 })
 
 app.post('/new_move', (req, res) => {
-  const { from,to } = req.body;
-
-  if (from === undefined || to === undefined  || game === null) {
+  const { from, to } = req.body;
+  let moveSucesfull = false
+  if (from === undefined || to === undefined || game === null) {
     console.log(from, to)
-    return res.status(400).json({ error: 'There was a problem with the new move', values: {from,to,game} });
+    return res.status(400).json({ error: 'There was a problem with the new move', values: { from, to, game } });
   }
 
   console.log('Received move to index:', from);
-  if(game.checkMoveValid(from, to)) {
-    game.processValidMovement(from, to)
+  if (game.checkMoveValid(from, to)) {
+    
+    game.processValidMovement(from, to);
+    moveSucesfull = true
   }
 
- 
+  // Extract necessary information from the game object to avoid circular reference
+  const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
+
   res.json({
-    message: 'Success',
-    from 
+    message: moveSucesfull,
+    from,
+    board: simplifiedBoard,
   });
 });
 
 app.get("/game_state", async (req, res)  => {
-  // console.log("RECIEVED MOVE ", req)
   res.json({
-    message: game 
+    message: game, 
+    board: game.getBoard(),
   })
 })
 

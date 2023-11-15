@@ -8,7 +8,7 @@ export default class Grid {
     this.height = height;
     this.width = width;
     this.cells = this.createCellsAndPieces(gameState);
-    this.logPieces()
+    // this.logPieces()
   }
 
   getPieceFromIdentifier(identifier){
@@ -64,16 +64,13 @@ export default class Grid {
       // Get the values at from and to indices
       const valueFrom = this.cells[from].value 
       const pieceFrom = this.cells[from].piece
-      // const valueTo = this.cells[to].value
-      // const pieceTo = this.cells[to].piece
-      // Rewrite the value at the "to" index and clear the value at "from" index
       this.cells[to].value = valueFrom 
       this.cells[from].value = `` 
       this.cells[to].piece = pieceFrom 
       this.cells[from].piece = null 
-      pieceFrom.index = index
+      pieceFrom.index = to
       pieceFrom.moved = true
-      this.logPieces()
+      // this.logPieces()
     }
 
    

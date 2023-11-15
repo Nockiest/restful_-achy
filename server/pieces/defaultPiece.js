@@ -6,7 +6,9 @@ export default class Piece {
       this.abreviation = "X"
       this.movementFunctions = [];
     }
-  
+    changeAbreviationBasedOnColor(){
+      // this fc willchange the abreviation to uppercase when the piece is white
+    }
     addMovementComponent(component) {
       this.movementFunctions.push(component);
     }

@@ -1,86 +1,96 @@
-import Grid from "./grid/grid.js"
-import Player from "./player.js"
+import Grid from "./grid/grid.js";
+import Player from "./player.js";
 
 export default class Game {
-    constructor(gameState, gameTime) {
-        
-        this.curPlayerIndex = 0; // Index of the current player in the players array
-        this.grid = new Grid(8, 8, gameState);
-        this.gameTime = gameTime;
-        this.players = this.generatePlayers();
-        this.checkedPlayer = "none";
-        this.timeInterval = null; // Added property to store setInterval reference
-        this.gameStarted = false; // Added property to track if the game has started
-    }
+  constructor(gameState, gameTime) {
+    this.curPlayerIndex = 0; 
+    this.grid = new Grid(8, 8, gameState);
+    this.gameTime = gameTime;
+    this.players = this.generatePlayers();
+    this.checkedPlayer = "none";
+    this.timeInterval = null; 
+    this.gameStarted = false; 
+  }
 
-    generatePlayers() {
-        var whitePlayer = new Player(this.gameTime, "white");
-        var blackPlayer = new Player(this.gameTime, "black");
-        return [whitePlayer, blackPlayer];
-    }
+  generatePlayers() {
+    var whitePlayer = new Player(this.gameTime, "white");
+    var blackPlayer = new Player(this.gameTime, "black");
+    return [whitePlayer, blackPlayer];
+  }
 
-    get curPlayer() { return this.players[this.curPlayerIndex]; }
+  get curPlayer() {
+    return this.players[this.curPlayerIndex];
+  }
 
-    switchPlayer() {
-        this.curPlayerIndex = 1 - this.curPlayerIndex; // Toggle between 0 and 1
-    }
+  switchPlayer() {
+    this.curPlayerIndex = 1 - this.curPlayerIndex; // Toggle between 0 and 1
+  }
 
-    startCountingTime() {
-        this.timeInterval = setInterval(() => {
-            this.countTime();
-        }, 1000); // Call countTime every second
-    }
+  startCountingTime() {
+    this.timeInterval = setInterval(() => {
+      this.countTime();
+    }, 1000);  
+  }
 
-    stopCountingTime() {
-        clearInterval(this.timeInterval);
-    }
+  stopCountingTime() {
+    clearInterval(this.timeInterval);
+  }
 
-    countTime() {
-        // console.log("COUNTING TIME");
-        // Add your time counting logic here
-        this.curPlayer.updateTime();
-    }
+  countTime() {
+    this.curPlayer.updateTime();
+  }
 
-    beginGame() {
-        console.log("BEGINNING GAME ")
-        if (!this.gameStarted) {
-            console.log("Game has begun!");
-            this.startCountingTime();
-            this.gameStarted = true;
-        } else {
-            console.log("The game has already started!");
-        }
+  getBoard() {
+    const board = [];
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const cell = this.grid.getCellAtIndex(row * 8 + col);
+        const piece = cell.piece
+          ? { piece: cell.piece.abreviation, color: cell.piece.color }
+          : null;
+        board.push(piece);
+      }
     }
-     
+    return board;
+  }
 
-     
-    checkMoveValid(from, to) {
-        console.log(from ,to)
-        const fromCell = this.grid.getCellAtIndex(from);
-        if (fromCell.piece === null){
-            console.log("FROM PIECE NULL")
-            return false
-        }
-        const toCell  = this.grid.getCellAtIndex(to);
-        console.log("Making move ", fromCell, toCell );
-        console.log(" MOVE? ",fromCell.piece.canMove )
-        console.log("CAN MOVE? ",fromCell.piece.canMove(to, this.grid))
-        // code for checking if movement is valid
-        return fromCell  && toCell ; // return if move is valid
+  beginGame() {
+    console.log("BEGINNING GAME ");
+    if (!this.gameStarted) {
+      console.log("Game has begun!");
+      this.startCountingTime();
+      this.gameStarted = true;
+    } else {
+      console.log("The game has already started!");
     }
+  }
 
-    processValidMovement(from, to) {
-        // other code for movement
-        this.grid.makeMove(from, to);
-        this.switchPlayer(); // Switch to the next player after a valid move
+  checkMoveValid(from, to) {
+    console.log(from, to);
+    const fromCell = this.grid.getCellAtIndex(from);
+    if (fromCell.piece === null) {
+      console.log("FROM PIECE NULL");
+      return false;
     }
+    const toCell = this.grid.getCellAtIndex(to);
+    console.log("Making move ", fromCell, toCell);
+    console.log("CAN MOVE? ", fromCell.piece.canMove(to, this.grid));
+    // code for checking if movement is valid
+    return true//fromCell.piece.canMove(to, this.grid); // return if move is valid
+  }
+
+  processValidMovement(from, to) {
+    // other code for movement
+    this.grid.makeMove(from, to);
+    this.switchPlayer(); // Switch to the next player after a valid move
+  }
 }
 
 // function findKingIndex(player, board) {
 //     if(player === "white"){
 //       return board.indexOf("K");
 //     } else {
-//       return board.indexOf("k");  
+//       return board.indexOf("k");
 //     }
 //   }
 //   function getAllThePieces(player, board){
@@ -106,20 +116,20 @@ export default class Game {
 //     const blackPiecesPositions =  getAllThePieces("black",board);
 //     let whiteInCheck = false;
 //     let blackInCheck = false;
-    
+
 //     for (let piece of whitePiecesPositions) {
-//       const pieceType =  getPieceType(board[piece])   
+//       const pieceType =  getPieceType(board[piece])
 //       const possibleMoves = pieceType.calculatePossibleMoves(piece, findPiecesColor(board[piece]), board)
 //       if (possibleMoves.includes(blackKingPos)) {
 //         blackInCheck = true;
-//       } 
-//     } 
-//     for (let piece of blackPiecesPositions) { 
+//       }
+//     }
+//     for (let piece of blackPiecesPositions) {
 //       const pieceType =  getPieceType(board[piece])
 //       const possibleMoves = pieceType.calculatePossibleMoves( piece, findPiecesColor(board[piece]), board)
 //       if (possibleMoves.includes(whiteKingPos)) {
 //         whiteInCheck = true;
-//       } 
+//       }
 //     }
 //     return {
 //       white: whiteInCheck,
