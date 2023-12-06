@@ -1,7 +1,8 @@
 import Grid from "./grid/grid";
 import Piece from "./pieces/defaultPiece";
 import Player from "./player";
-import { BoardIndex } from "./types/types";
+import { BoardIndex, PieceLetter } from "./types/types";
+import { checkInGameBounds } from "./utils";
 
 export default class Game {
   private curPlayerIndex: number = 0;
@@ -10,9 +11,9 @@ export default class Game {
   private players: Player[];
   private checkedPlayer: string = "none";
   private timeInterval: NodeJS.Timeout | null = null;
-  private gameStarted: boolean = false;
+  public gameStarted: boolean = false;
 
-  constructor(gameState: string[], gameTime: number) {
+  constructor(gameState: Array<PieceLetter>, gameTime: number) {
     this.grid = new Grid(8, 8, gameState);
     this.gameTime = gameTime;
     this.players = this.generatePlayers();
@@ -48,14 +49,15 @@ export default class Game {
     this.curPlayer.updateTime();
   }
 
-  public getBoard(): (Piece | null)[] {
-    const board: (Piece | null)[] = [];
+  public getBoard(): Array<Piece|null|undefined>   {
+    const board:  Array<Piece|null|undefined>  = [];
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
-        const cell = this.grid.getCellAtIndex(row * 8 + col);
+        if (!checkInGameBounds){
+          board.push(null) 
+          continue}
+        const cell = this.grid.getCellAtIndex(row * 8 + col as BoardIndex);
         const piece = cell?.piece
-          ? { piece: cell.piece.abbreviation, color: cell.piece.color }
-          : null;
         board.push(piece);
       }
     }
@@ -76,7 +78,7 @@ export default class Game {
   public checkMoveValid(from: BoardIndex, to: BoardIndex): boolean {
     console.log(from, to);
     const fromCell = this.grid.getCellAtIndex(from);
-    if (fromCell.piece === null) {
+    if (fromCell?.piece === null||fromCell?.piece === undefined) {
       console.log("FROM PIECE NULL");
       return false;
     }
@@ -87,7 +89,7 @@ export default class Game {
     return true; //fromCell.piece.canMove(to, this.grid); // return if move is valid
   }
 
-  public processValidMovement(from: number, to: number): void {
+  public processValidMovement(from: BoardIndex, to: BoardIndex): void {
     // other code for movement
     this.grid.makeMove(from, to);
     this.switchPlayer(); // Switch to the next player after a valid move

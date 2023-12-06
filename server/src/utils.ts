@@ -6,3 +6,13 @@ export function checkInGameBounds(index: number){
         return true
       }
 }
+
+export function coordsToIndex(row: number, column: number, numberOfColumns: number): number {
+  return row * numberOfColumns + column;
+}
+
+export function indexToCoords(index: number, numberOfColumns: number): { row: number, column: number } {
+  const row = Math.floor(index / numberOfColumns);
+  const column = index % numberOfColumns;
+  return { row, column };
+}

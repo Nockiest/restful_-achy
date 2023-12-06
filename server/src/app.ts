@@ -1,14 +1,16 @@
 import express, { Request, Response } from "express";
+// const express = require('express')
 import cors from "cors";
 import Game from "./game"; // Assuming your file is named "game.ts"
+import { PieceLetter } from "./types/types";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 let game: Game | null = null;
-
-app.post("/create_game", async (req: Request, res: Response) => {
+const beginningState: Array<PieceLetter> = ['x','x','b','x','x','b','x','x', 'x','x','x','x','x','x','x','x','','','','','','','','', '','','','','','','','',    '','','','','','','','', '','','','','','','','',  'X','X','X','X','X','X','X','X', 'X','X','B','X','X','B','X', 'X',] 
+app.post("/create_game", async (req: any, res: any) => {
   game = new Game(beginningState, 600);
 
   const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
@@ -17,7 +19,7 @@ app.post("/create_game", async (req: Request, res: Response) => {
     message: 'Success',
     game,
     board: simplifiedBoard,
-    initialized: game?.initialized, // Include the initialization status
+    initialized: game?.gameStarted, // Include the initialization status
   });
 });
 
@@ -29,7 +31,7 @@ app.post("/begin_game", async (req: Request, res: Response) => {
   }
 });
 
-app.post('/new_move', (req: Request, res: Response) => {
+app.post('/new_move', (req: any, res: any) => {
   const { from, to } = req.body;
   let moveSuccessful = false;
   if (from === undefined || to === undefined || game === null) {
@@ -53,7 +55,7 @@ app.post('/new_move', (req: Request, res: Response) => {
   });
 });
 
-app.get("/game_state", async (req: Request, res: Response) => {
+app.get("/game_state", async (req: any, res: any) => {
   if (game) {
     res.json({
       message: game,

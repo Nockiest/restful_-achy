@@ -1,11 +1,13 @@
-import { PlayerColor, BoardIndex } from "../types/types";
+import Grid from "../grid/grid";
+import { PlayerColor, BoardIndex, MovementComponent } from "../types/types";
+import { indexToCoords } from "../utils";
 
 export default class Piece {
   color: PlayerColor;
   index: BoardIndex;
   moved: boolean;
   abbreviation: string;
-  movementFunctions: ((currentPosition: Position, targetPosition: Position) => boolean)[];
+  movementFunctions: Array<MovementComponent>;
 
   constructor(color: PlayerColor, index: BoardIndex) {
     this.color = color;
@@ -22,13 +24,13 @@ export default class Piece {
     }
   }
 
-  addMovementComponent(component: (currentPosition: Position, targetPosition: Position) => boolean) {
+  addMovementComponent(component:MovementComponent) {
     this.movementFunctions.push(component);
   }
 
-  canMove(targetPosition: Position, board: any) {
+  canMove(targetPosition: BoardIndex, grid: Grid) {
     for (const movementFunction of this.movementFunctions) {
-      if (movementFunction({ row: this.index / 8, column: this.index % 8 }, targetPosition)) {
+      if (movementFunction(this.index, this.color, grid, 8)) {
         return true;
       }
     }
@@ -36,36 +38,38 @@ export default class Piece {
   }
 }
 
-interface Position {
-  row: number;
-  column: number;
-}
-
 class OneMoveForwardComponent {
-  canMove(currentPosition: Position, targetPosition: Position) {
+  canMove(currentPosition: BoardIndex, targetPosition: BoardIndex) {
+    const { row, column } = indexToCoords(currentPosition, 8);
+    const { row: targetRow, column: targetColumn } = indexToCoords(targetPosition, 8);
     return (
-      Math.abs(targetPosition.row - currentPosition.row) === 1 &&
-      targetPosition.column === currentPosition.column
+      Math.abs(targetRow - row) === 1 &&
+      targetColumn === column
     );
   }
 }
 
 class DiagonalMovementComponent {
-  canMove(currentPosition: Position, targetPosition: Position) {
+  canMove(currentPosition: BoardIndex, targetPosition: BoardIndex) {
+    const { row, column } = indexToCoords(currentPosition, 8);
+    const { row: targetRow, column: targetColumn } = indexToCoords(targetPosition, 8);
     return (
-      Math.abs(targetPosition.row - currentPosition.row) === 1 &&
-      Math.abs(targetPosition.column - currentPosition.column) === 1
+      Math.abs(targetRow - row) === 1 &&
+      Math.abs(targetColumn - column) === 1
     );
   }
 }
 
 class LShapeMoveComponent {
-  canMove(currentPosition: Position, targetPosition: Position) {
+  canMove(currentPosition: BoardIndex, targetPosition: BoardIndex) {
+    const { row, column } = indexToCoords(currentPosition, 8);
+    const { row: targetRow, column: targetColumn } = indexToCoords(targetPosition, 8);
+
     return (
-      (Math.abs(targetPosition.row - currentPosition.row) === 2 &&
-        Math.abs(targetPosition.column - currentPosition.column) === 1) ||
-      (Math.abs(targetPosition.row - currentPosition.row) === 1 &&
-        Math.abs(targetPosition.column - currentPosition.column) === 2)
+      (Math.abs(targetRow - row) === 2 &&
+        Math.abs(targetColumn - column) === 1) ||
+      (Math.abs(targetRow - row) === 1 &&
+        Math.abs(targetColumn - column) === 2)
     );
   }
 }

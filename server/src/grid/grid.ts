@@ -28,8 +28,14 @@ export default class Grid {
   private createCellsAndPieces(gameState: PieceLetter[]): Cell[] {
     const cells: Cell[] = [];
     for (let i = 0; i < this.height * this.width; i++) {
+      if ( i >= 64 ){
+        console.error('this index is to big', i)
+        break
+      }
       const pieceType = this.getPieceFromIdentifier(gameState[i]);
-      const newPiece = new pieceType(gameState[i].toLowerCase(), i);
+      const color = gameState[i].toLowerCase() === 'white' ? 'white' : 'black';
+      const newPiece = new pieceType(color, i as BoardIndex);
+
       const newCell = new Cell(i, gameState[i], newPiece);
       cells.push(newCell);
     }
@@ -37,14 +43,24 @@ export default class Grid {
   }
 
   public instantiatePieces(valuearr: Fixed64LengthBoard): void {
-    
-
     // Loop through the cells and set their values based on the array
     this.cells.forEach((cell, index) => {
-      cell.changeValue(valuearr[index]);
-      cell.piece = new Piece();
+        const pieceLetter = valuearr[index];
+        if (pieceLetter === null || index >= 64) {
+            return; // Skip to the next iteration
+        }
+
+        // Check if pieceLetter is uppercase (white) or lowercase (black)
+        const color = pieceLetter === pieceLetter.toUpperCase() ? 'white' : 'black';
+
+        // Change the value of the cell
+        cell.changeValue(pieceLetter);
+
+        // Create a new Piece with the determined color
+        cell.piece = new Piece(color, index as BoardIndex);
     });
-  }
+}
+
 
   public getCellAtIndex(index: BoardIndex): Cell | undefined {
     if (checkInGameBounds(index)) {
@@ -52,7 +68,7 @@ export default class Grid {
     }
   }
 
-  public getPieceAtIndex(index: BoardIndex): PieceLetter | undefined {
+  public getPieceAtIndex(index: BoardIndex): PieceLetter | null| undefined {
     if (checkInGameBounds(index)) {
       return this.cells[index].letterValue;
     }

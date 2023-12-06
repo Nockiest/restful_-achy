@@ -1,6 +1,8 @@
+import Grid from "../grid/grid";
+
  
 type ToLowercaseUppercase<T extends string> = `${Uppercase<T> & Lowercase<T>}`;
-export type PieceLetter  = ""|'r'| 'n'| 'b'| 'q'| 'k'| 'p'  | 'R'| 'N'| 'N'| 'Q'| 'K'| 'P' 
+export type PieceLetter  = ""|'r'| 'n'| 'b'| 'q'| 'k'| 'p'  | 'R'| 'N'| 'B'| 'Q'| 'K'| 'P'| 'x'|'X' 
 export type PlayerColor = 'white'| 'black'
 export type Piece = {
     abreviation: PieceLetter
@@ -26,6 +28,13 @@ type NullArray<T extends number, Result extends any[] = []> =
 
 export type Fixed64LengthBoard = [...NullArray<64>, ...PieceLetter[]];
 
+export type MovementComponent = (
+  currentPosition: BoardIndex,
+  pieceColor: PlayerColor,
+  grid: Grid,
+  range?: number,
+  directions?: string[]
+) => number[];
 // type NullOrNumberArray<T extends number, Result extends any[] = []> =
 // Result['length'] extends T ? Result : NullOrNumberArray<T, [...Result, null | number]>;
 
