@@ -1,19 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Cell = /** @class */ (function () {
-    function Cell(index, startValue, piece) {
+class Cell {
+    constructor(index, startValue, piece) {
         this.index = index;
-        this.value = startValue;
+        this.letterValue = startValue;
         this.piece = piece;
     }
-    Cell.prototype.changeValue = function (newValue) {
-        if (typeof (newValue) != "string") {
-            console.log("DONT CHANGE VALUE TO SOMETHING DIFFERENT THAN A STRING");
-            return;
-        }
-        this.value = newValue;
-        console.log("value changed sucesfully ", this.value);
-    };
-    return Cell;
-}());
+    changeValue(newValue) {
+        // if (newValue === null) {
+        //     console.log("DON'T CHANGE VALUE TO NULL");
+        //     return;
+        // }
+        // if (typeof newValue !== "string") {
+        //     console.log("DON'T CHANGE VALUE TO SOMETHING DIFFERENT THAN A STRING");
+        //     return;
+        // }
+        this.letterValue = newValue;
+        console.log("Value changed successfully", this.letterValue);
+    }
+}
 exports.default = Cell;

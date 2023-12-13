@@ -16,12 +16,14 @@ export default class Grid {
     // this.logPieces();
   }
 
-  private getPieceFromIdentifier(identifier: PieceLetter): typeof Piece {
+  private getPieceFromIdentifier(identifier: PieceLetter): typeof Piece |null{
     // switch statement for getting the correct piece type
     if (identifier.toLowerCase() === "b") {
       return Bishop;
-    } else {
+    } else if  (identifier.toLowerCase() === "x") {
       return Piece;
+    } else {
+      return null
     }
   }
 
@@ -33,12 +35,20 @@ export default class Grid {
         break
       }
       const pieceType = this.getPieceFromIdentifier(gameState[i]);
-      const color = gameState[i].toLowerCase() === 'white' ? 'white' : 'black';
-      const newPiece = new pieceType(color, i as BoardIndex);
-
-      const newCell = new Cell(i, gameState[i], newPiece);
+      let newCell: Cell;
+      if (pieceType){
+        const color = gameState[i].toLowerCase() === gameState[i] ? 'white' : 'black';
+        const newPiece = new pieceType(color, i as BoardIndex);
+        console.log(newPiece,  gameState[i])
+        newCell = new Cell(i, gameState[i], newPiece);
+        
+      } else {
+        newCell =  new Cell(i, gameState[i], null)
+      }
+      
       cells.push(newCell);
     }
+    console.log(gameState)
     return cells;
   }
 

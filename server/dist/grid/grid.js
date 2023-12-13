@@ -1,84 +1,103 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var cell_js_1 = require("./cell.js");
-var utils_js_1 = require("../utils.js");
-var defaultPiece_js_1 = require("../pieces/defaultPiece.js");
-var bishop_js_1 = require("../pieces/bishop.js");
-var Grid = /** @class */ (function () {
-    function Grid(height, width, gameState) {
+const cell_1 = __importDefault(require("./cell"));
+const utils_1 = require("../utils");
+const defaultPiece_1 = __importDefault(require("../pieces/defaultPiece"));
+const bishop_1 = __importDefault(require("../pieces/bishop"));
+class Grid {
+    constructor(height, width, gameState) {
         this.height = height;
         this.width = width;
         this.cells = this.createCellsAndPieces(gameState);
-        // this.logPieces()
+        // this.logPieces();
     }
-    Grid.prototype.getPieceFromIdentifier = function (identifier) {
+    getPieceFromIdentifier(identifier) {
         // switch statement for getting the correct piece type
         if (identifier.toLowerCase() === "b") {
-            return bishop_js_1.default;
+            return bishop_1.default;
+        }
+        else if (identifier.toLowerCase() === "x") {
+            return defaultPiece_1.default;
         }
         else {
-            return defaultPiece_js_1.default;
+            return null;
         }
-    };
-    Grid.prototype.createCellsAndPieces = function (gameState) {
-        var cells = [];
-        for (var i = 0; i < this.height * this.width; i++) {
-            var piece = this.getPieceFromIdentifier(gameState[i]);
-            var newPiece = null;
-            var color = null;
-            if (gameState[i]) {
-                console.log("x", gameState[i]);
-                color = gameState[i] === gameState[i].toLowerCase() ? 'black' : 'white';
-                newPiece = new piece(color, i);
+    }
+    createCellsAndPieces(gameState) {
+        const cells = [];
+        for (let i = 0; i < this.height * this.width; i++) {
+            if (i >= 64) {
+                console.error('this index is to big', i);
+                break;
             }
-            var newCell = new cell_js_1.default(i, gameState[i], newPiece);
+            const pieceType = this.getPieceFromIdentifier(gameState[i]);
+            let newCell;
+            if (pieceType) {
+                const color = gameState[i].toLowerCase() === gameState[i] ? 'white' : 'black';
+                const newPiece = new pieceType(color, i);
+                console.log(newPiece, gameState[i]);
+                newCell = new cell_1.default(i, gameState[i], newPiece);
+            }
+            else {
+                newCell = new cell_1.default(i, gameState[i], null);
+            }
             cells.push(newCell);
         }
+        console.log(gameState);
         return cells;
-    };
-    Grid.prototype.instantiatePieces = function (valuearr) {
-        if (valuearr.length !== this.height * this.width) {
-            throw new Error('Setting new cell value with an array of wrong length', valuearr.length);
-        }
+    }
+    instantiatePieces(valuearr) {
         // Loop through the cells and set their values based on the array
-        this.cells.forEach(function (cell, index) {
-            cell.setValue(valuearr[index]);
-            cell.piece = new defaultPiece_js_1.default();
+        this.cells.forEach((cell, index) => {
+            const pieceLetter = valuearr[index];
+            if (pieceLetter === null || index >= 64) {
+                return; // Skip to the next iteration
+            }
+            // Check if pieceLetter is uppercase (white) or lowercase (black)
+            const color = pieceLetter === pieceLetter.toUpperCase() ? 'white' : 'black';
+            // Change the value of the cell
+            cell.changeValue(pieceLetter);
+            // Create a new Piece with the determined color
+            cell.piece = new defaultPiece_1.default(color, index);
         });
-    };
-    Grid.prototype.getCellAtIndex = function (index) {
-        if ((0, utils_js_1.checkInGameBounds)(index)) {
+    }
+    getCellAtIndex(index) {
+        if ((0, utils_1.checkInGameBounds)(index)) {
             return this.cells[index];
         }
-    };
-    Grid.prototype.getPieceAtIndex = function (index) {
-        if ((0, utils_js_1.checkInGameBounds)(index)) {
-            return this.cells[index].value;
+    }
+    getPieceAtIndex(index) {
+        if ((0, utils_1.checkInGameBounds)(index)) {
+            return this.cells[index].letterValue;
         }
-    };
-    Grid.prototype.makeMove = function (from, to) {
+    }
+    makeMove(from, to) {
         // Ensure that from and to are valid indices
-        if ((0, utils_js_1.checkInGameBounds)(from) && (0, utils_js_1.checkInGameBounds)(to)) {
+        if ((0, utils_1.checkInGameBounds)(from) && (0, utils_1.checkInGameBounds)(to)) {
             // Get the values at from and to indices
-            var valueFrom = this.cells[from].value;
-            var pieceFrom = this.cells[from].piece;
-            this.cells[to].value = valueFrom;
-            this.cells[from].value = "";
+            const valueFrom = this.cells[from].letterValue;
+            const pieceFrom = this.cells[from].piece;
+            this.cells[to].letterValue = valueFrom;
+            this.cells[from].letterValue = '';
             this.cells[to].piece = pieceFrom;
             this.cells[from].piece = null;
-            pieceFrom.index = to;
-            pieceFrom.moved = true;
-            // this.logPieces()
+            if (pieceFrom) {
+                pieceFrom.index = to;
+                pieceFrom.moved = true;
+            }
+            // this.logPieces();
         }
-    };
-    Grid.prototype.logGrid = function () {
+    }
+    logGrid() {
         // Log the grid for debugging purposes
-        console.log(this.cells.map(function (cell) { return cell.value; }));
-    };
-    Grid.prototype.logPieces = function () {
+        console.log(this.cells.map((cell) => cell.letterValue));
+    }
+    logPieces() {
         // Log the grid for debugging purposes
-        console.log(this.cells.map(function (cell) { return cell.piece; }));
-    };
-    return Grid;
-}());
+        console.log(this.cells.map((cell) => cell.piece));
+    }
+}
 exports.default = Grid;

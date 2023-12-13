@@ -1,30 +1,15 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var diagonal_move_js_1 = require("../movement_components/diagonal_move.js");
-var defaultPiece_js_1 = require("./defaultPiece.js");
-var Bishop = /** @class */ (function (_super) {
-    __extends(Bishop, _super);
-    function Bishop(color, index) {
-        var _this = _super.call(this, color, index) || this;
-        _this.abreviation = color === 'white' ? 'B' : "b";
-        _this.movementFunctions.push(diagonal_move_js_1.default);
-        return _this;
+const diagonal_move_1 = __importDefault(require("../movement_components/diagonal_move"));
+const defaultPiece_1 = __importDefault(require("./defaultPiece"));
+class Bishop extends defaultPiece_1.default {
+    constructor(color, index) {
+        super(color, index);
+        this.abbreviation = color === 'white' ? 'B' : 'b';
+        this.movementFunctions.push(diagonal_move_1.default);
     }
-    return Bishop;
-}(defaultPiece_js_1.default));
+}
 exports.default = Bishop;
