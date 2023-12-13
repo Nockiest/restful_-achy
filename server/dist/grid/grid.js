@@ -7,17 +7,29 @@ const cell_1 = __importDefault(require("./cell"));
 const utils_1 = require("../utils");
 const defaultPiece_1 = __importDefault(require("../pieces/defaultPiece"));
 const bishop_1 = __importDefault(require("../pieces/bishop"));
+const knight_1 = __importDefault(require("../pieces/knight"));
 class Grid {
     constructor(height, width, gameState) {
         this.height = height;
         this.width = width;
         this.cells = this.createCellsAndPieces(gameState);
-        // this.logPieces();
     }
     getPieceFromIdentifier(identifier) {
         // switch statement for getting the correct piece type
         if (identifier.toLowerCase() === "b") {
             return bishop_1.default;
+        }
+        else if (identifier.toLowerCase() === "k") {
+            return null; // King;
+        }
+        else if (identifier.toLowerCase() === "q") {
+            return null; //Queen;
+        }
+        else if (identifier.toLowerCase() === "p") {
+            return null; //Pawn
+        }
+        else if (identifier.toLowerCase() === "n") {
+            return knight_1.default;
         }
         else if (identifier.toLowerCase() === "x") {
             return defaultPiece_1.default;

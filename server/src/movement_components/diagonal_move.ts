@@ -2,14 +2,14 @@ import Grid from '../grid/grid';
 import { BoardIndex, PlayerColor,   } from '../types/types';
 
 const diagonalMovesComponent = (
-  position: BoardIndex,
+  startPosition: BoardIndex,
   pieceColor: PlayerColor,
   grid: Grid,
   range = 8,
   directions = ['up-left', 'up-right', 'down-left', 'down-right']
 ): number[] => {
-  const row = Math.floor(position / 8);
-  const col = position % 8;
+  const row = Math.floor(startPosition / 8);
+  const col = startPosition % 8;
   const possibleMoves: number[] = [];
   const directionOffsets: { [key: string]: number[] } = {
     'up-left': [-1, -1],
@@ -56,7 +56,7 @@ const diagonalMovesComponent = (
   
   });
 
-  console.log(position, possibleMoves);
+  console.log(startPosition, possibleMoves);
   return possibleMoves;
 };
 

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const diagonalMovesComponent = (position, pieceColor, grid, range = 8, directions = ['up-left', 'up-right', 'down-left', 'down-right']) => {
-    const row = Math.floor(position / 8);
-    const col = position % 8;
+const diagonalMovesComponent = (startPosition, pieceColor, grid, range = 8, directions = ['up-left', 'up-right', 'down-left', 'down-right']) => {
+    const row = Math.floor(startPosition / 8);
+    const col = startPosition % 8;
     const possibleMoves = [];
     const directionOffsets = {
         'up-left': [-1, -1],
@@ -43,7 +43,7 @@ const diagonalMovesComponent = (position, pieceColor, grid, range = 8, direction
             }
         }
     });
-    console.log(position, possibleMoves);
+    console.log(startPosition, possibleMoves);
     return possibleMoves;
 };
 exports.default = diagonalMovesComponent;

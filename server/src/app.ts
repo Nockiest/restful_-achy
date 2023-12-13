@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 let game: Game | null = null;
-const beginningState: Array<PieceLetter> = ['x','x','b','x','x','b','x','x', 'x','x','x','x','x','x','x','x','','','','b','','','','', '','','','','','','','',    '','','','','','','','', '','','','','','','','',  'X','X','X','X','X','X','X','X', 'X','X','B','X','X','B','X', 'X',] 
+const beginningState: Array<PieceLetter> = ['x','n','b','x','x','b','n','x', 'x','x','x','x','x','x','x','x','','','','b','','','','', '','','','','','','','',    '','','','','','','','', '','','','','','','','',  'X','X','X','X','X','X','X','X', 'X','N','B','X','X','B','N', 'X',] 
 
 app.post("/create_game", async (req: any, res: any) => {
   game = null

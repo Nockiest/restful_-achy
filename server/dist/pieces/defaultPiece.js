@@ -6,7 +6,7 @@ class Piece {
         this.color = color;
         this.index = index;
         this.moved = false;
-        this.abbreviation = "X";
+        this.abbreviation = color === 'white' ? 'X' : 'x';
         this.movementFunctions = [];
     }
     changeAbbreviationBasedOnColor() {

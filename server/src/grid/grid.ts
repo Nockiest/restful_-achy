@@ -3,6 +3,7 @@ import { checkInGameBounds } from "../utils";
 import Piece from "../pieces/defaultPiece";
 import Bishop from "../pieces/bishop";
 import {   Fixed64LengthBoard, PieceLetter, BoardIndex } from "../types/types";
+import Knight from "../pieces/knight";
 
 export default class Grid {
   private height: number;
@@ -13,14 +14,22 @@ export default class Grid {
     this.height = height;
     this.width = width;
     this.cells = this.createCellsAndPieces(gameState);
-    // this.logPieces();
+    
   }
 
   private getPieceFromIdentifier(identifier: PieceLetter): typeof Piece |null{
     // switch statement for getting the correct piece type
     if (identifier.toLowerCase() === "b") {
       return Bishop;
-    } else if  (identifier.toLowerCase() === "x") {
+    } else if  (identifier.toLowerCase() === "k") {
+      return null // King;
+    }  else if  (identifier.toLowerCase() === "q") {
+      return null //Queen;
+    } else if  (identifier.toLowerCase() === "p") {
+      return null //Pawn
+    } else if  (identifier.toLowerCase() === "n") {
+      return Knight;
+    }else if  (identifier.toLowerCase() === "x") {
       return Piece;
     } else {
       return null
