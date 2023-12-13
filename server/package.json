@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/app.js",
-  
   "scripts": {
-    "start": "nodemon app.js"
+    "dev": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",

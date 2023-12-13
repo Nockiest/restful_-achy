@@ -19,9 +19,11 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 let game = null;
-const beginningState = ['x', 'x', 'b', 'x', 'x', 'b', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'B', 'X', 'X', 'B', 'X', 'X',];
+const beginningState = ['x', 'x', 'b', 'x', 'x', 'b', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', '', '', '', 'b', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'B', 'X', 'X', 'B', 'X', 'X',];
 app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    game = null;
     game = new game_1.default(beginningState, 600);
+    // console.log(game)
     const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
     res.json({
         message: 'Success',
@@ -42,26 +44,38 @@ app.post('/new_move', (req, res) => {
     const { from, to } = req.body;
     let moveSuccessful = false;
     if (from === undefined || to === undefined || game === null) {
-        console.log(from, to);
+        // console.log(from, to);
         return res.status(400).json({ error: 'There was a problem with the new move', values: { from, to, game } });
     }
-    console.log('Received move to index:', from);
+    // console.log('Received move to index:', from);
     if (game.checkMoveValid(from, to)) {
+        console.log('move valud');
         game.processValidMovement(from, to);
         moveSuccessful = true;
     }
     // Extract necessary information from the game object to avoid circular reference
     const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
+    console.log('x', moveSuccessful);
     res.json({
         message: moveSuccessful,
         from,
         board: simplifiedBoard,
     });
 });
+const seen = []; // I have added this wierd code because of a json error
 app.get("/game_state", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (game) {
+        const cleanGame = JSON.stringify(game, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.includes(value)) {
+                    return '[Circular]';
+                }
+                seen.push(value);
+            }
+            return value;
+        });
         res.json({
-            message: game,
+            message: cleanGame,
             board: game.getBoard(),
         });
     }

@@ -74,10 +74,10 @@ class Game {
             return false;
         }
         const toCell = this.grid.getCellAtIndex(to);
-        console.log("Making move ", fromCell, toCell);
+        console.log("Making move ", fromCell, 'to', toCell);
         console.log("CAN MOVE? ", fromCell.piece.canMove(to, this.grid));
         // code for checking if movement is valid
-        return true; //fromCell.piece.canMove(to, this.grid); // return if move is valid
+        return fromCell.piece.canMove(to, this.grid); //fromCell.piece.canMove(to, this.grid); // return if move is valid
     }
     processValidMovement(from, to) {
         // other code for movement

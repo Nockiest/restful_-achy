@@ -23,14 +23,10 @@ export default class Piece {
       this.abbreviation = this.abbreviation.toUpperCase();
     }
   }
-
-  addMovementComponent(component:MovementComponent) {
-    this.movementFunctions.push(component);
-  }
-
   canMove(targetPosition: BoardIndex, grid: Grid) {
     for (const movementFunction of this.movementFunctions) {
-      if (movementFunction(this.index, this.color, grid, 8)) {
+      if (movementFunction(this.index, this.color, grid, 8).indexOf(targetPosition) !== -1) {
+        console.log('xxxxxx', movementFunction(targetPosition, this.color, grid, 8).indexOf(targetPosition), ' ', movementFunction(targetPosition, this.color, grid, 8))
         return true;
       }
     }

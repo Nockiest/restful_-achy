@@ -56,7 +56,7 @@ const diagonalMovesComponent = (
   
   });
 
-  console.log(possibleMoves);
+  console.log(position, possibleMoves);
   return possibleMoves;
 };
 

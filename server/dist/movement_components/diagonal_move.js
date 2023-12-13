@@ -43,7 +43,7 @@ const diagonalMovesComponent = (position, pieceColor, grid, range = 8, direction
             }
         }
     });
-    console.log(possibleMoves);
+    console.log(position, possibleMoves);
     return possibleMoves;
 };
 exports.default = diagonalMovesComponent;

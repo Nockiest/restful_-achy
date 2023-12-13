@@ -38,7 +38,6 @@ class Grid {
             if (pieceType) {
                 const color = gameState[i].toLowerCase() === gameState[i] ? 'white' : 'black';
                 const newPiece = new pieceType(color, i);
-                console.log(newPiece, gameState[i]);
                 newCell = new cell_1.default(i, gameState[i], newPiece);
             }
             else {
@@ -46,7 +45,6 @@ class Grid {
             }
             cells.push(newCell);
         }
-        console.log(gameState);
         return cells;
     }
     instantiatePieces(valuearr) {
