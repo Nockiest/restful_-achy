@@ -1,13 +1,18 @@
 import Grid from '../grid/grid';
-import { BoardIndex, PlayerColor,   } from '../types/types';
+import { BoardIndex, PlayerColor, MovesComponentArgs,   } from '../types/types';
+ 
 
-const diagonalMovesComponent = (
-  startPosition: BoardIndex,
-  pieceColor: PlayerColor,
-  grid: Grid,
+const diagonalMovesComponent = ({
+  startPosition,
+  pieceColor,
+  grid,
   range = 8,
-  directions = ['up-left', 'up-right', 'down-left', 'down-right']
-): number[] => {
+  directions = ['up-left', 'up-right', 'down-left', 'down-right'],
+}: MovesComponentArgs): number[] => {
+  if (!range){
+    console.error('you forgot to add range')
+    return []
+  }
   const row = Math.floor(startPosition / 8);
   const col = startPosition % 8;
   const possibleMoves: number[] = [];

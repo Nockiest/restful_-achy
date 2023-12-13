@@ -4,6 +4,8 @@ import Piece from "../pieces/defaultPiece";
 import Bishop from "../pieces/bishop";
 import {   Fixed64LengthBoard, PieceLetter, BoardIndex } from "../types/types";
 import Knight from "../pieces/knight";
+import Rook from "../pieces/rook";
+import Queen from "../pieces/queen";
 
 export default class Grid {
   private height: number;
@@ -24,7 +26,9 @@ export default class Grid {
     } else if  (identifier.toLowerCase() === "k") {
       return null // King;
     }  else if  (identifier.toLowerCase() === "q") {
-      return null //Queen;
+      return  Queen;
+    } else if  (identifier.toLowerCase() === "r") {
+      return Rook;
     } else if  (identifier.toLowerCase() === "p") {
       return null //Pawn
     } else if  (identifier.toLowerCase() === "n") {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const knightMovesComponent = (startPosition, pieceColor, grid) => {
+const knightMovesComponent = ({ startPosition, pieceColor, grid, }) => {
     const row = Math.floor(startPosition / 8);
     const col = startPosition % 8;
     const possibleMoves = [];

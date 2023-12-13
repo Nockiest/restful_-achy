@@ -16,7 +16,13 @@ type Range<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate
 export type BoardIndex = Range<0, 63>
 export type Board = (PieceLetter | null)[];
 
-
+export type MovesComponentArgs = {
+  startPosition: BoardIndex;
+  pieceColor: PlayerColor;
+  grid: Grid;
+  range?: number | null;
+  directions?: string[];
+};
 type ArrayLengthMutationKeys = 'splice' | 'push' | 'pop' | 'shift' | 'unshift' | number
 type ArrayItems<T extends Array<any>> = T extends Array<infer TItems> ? TItems : never
 type FixedLengthArray<T extends any[]> =
@@ -28,13 +34,7 @@ type NullArray<T extends number, Result extends any[] = []> =
 
 export type Fixed64LengthBoard = [...NullArray<64>, ...PieceLetter[]];
 
-export type MovementComponent = (
-  currentPosition: BoardIndex,
-  pieceColor: PlayerColor,
-  grid: Grid,
-  range?: number,
-  directions?: string[]
-) => number[];
+export type MovementComponent = (args: MovesComponentArgs) => number[];
 // type NullOrNumberArray<T extends number, Result extends any[] = []> =
 // Result['length'] extends T ? Result : NullOrNumberArray<T, [...Result, null | number]>;
 

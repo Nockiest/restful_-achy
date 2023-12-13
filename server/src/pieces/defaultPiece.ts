@@ -8,11 +8,12 @@ export default class Piece {
   moved: boolean;
   abbreviation: string;
   movementFunctions: Array<MovementComponent>;
-
-  constructor(color: PlayerColor, index: BoardIndex) {
+  range : number|null
+  constructor(color: PlayerColor, index: BoardIndex,  ) {
     this.color = color;
     this.index = index;
     this.moved = false;
+    this.range = null
     this.abbreviation =  color === 'white' ? 'X' : 'x';
     this.movementFunctions = [];
   }
@@ -25,8 +26,8 @@ export default class Piece {
   }
   canMove(targetPosition: BoardIndex, grid: Grid) {
     for (const movementFunction of this.movementFunctions) {
-      if (movementFunction(this.index, this.color, grid, 8).indexOf(targetPosition) !== -1) {
-        console.log('xxxxxx', movementFunction(targetPosition, this.color, grid, 8).indexOf(targetPosition), ' ', movementFunction(targetPosition, this.color, grid, 8))
+      if (movementFunction({startPosition:this.index, pieceColor:this.color, grid, range:this.range}).indexOf(targetPosition) !== -1) {
+        
         return true;
       }
     }

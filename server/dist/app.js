@@ -19,7 +19,7 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 let game = null;
-const beginningState = ['x', 'n', 'b', 'x', 'x', 'b', 'n', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', '', '', '', 'b', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'N', 'B', 'X', 'X', 'B', 'N', 'X',];
+const beginningState = ['x', 'n', 'b', 'x', 'x', 'b', 'n', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', '', '', '', 'Q', '', '', '', 'q', '', '', '', '', '', '', '', '', '', '', 'r', '', '', '', '', '', '', 'R', '', '', '', '', '', '', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'N', 'B', 'X', 'X', 'B', 'N', 'X',];
 app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     game = null;
     game = new game_1.default(beginningState, 600);

@@ -8,6 +8,8 @@ const utils_1 = require("../utils");
 const defaultPiece_1 = __importDefault(require("../pieces/defaultPiece"));
 const bishop_1 = __importDefault(require("../pieces/bishop"));
 const knight_1 = __importDefault(require("../pieces/knight"));
+const rook_1 = __importDefault(require("../pieces/rook"));
+const queen_1 = __importDefault(require("../pieces/queen"));
 class Grid {
     constructor(height, width, gameState) {
         this.height = height;
@@ -23,7 +25,10 @@ class Grid {
             return null; // King;
         }
         else if (identifier.toLowerCase() === "q") {
-            return null; //Queen;
+            return queen_1.default;
+        }
+        else if (identifier.toLowerCase() === "r") {
+            return rook_1.default;
         }
         else if (identifier.toLowerCase() === "p") {
             return null; //Pawn

@@ -1,11 +1,11 @@
 import Grid from '../grid/grid';
-import { BoardIndex, PlayerColor } from '../types/types';
+import { BoardIndex, PlayerColor, MovesComponentArgs } from '../types/types';
 
-const knightMovesComponent = (
-  startPosition: BoardIndex,
-  pieceColor: PlayerColor,
-  grid: Grid
-): number[] => {
+const knightMovesComponent = ({
+    startPosition,
+    pieceColor,
+    grid,
+  }: MovesComponentArgs):  number[] => {
   const row = Math.floor(startPosition / 8);
   const col = startPosition % 8;
   const possibleMoves: number[] = [];
