@@ -10,6 +10,8 @@ const bishop_1 = __importDefault(require("../pieces/bishop"));
 const knight_1 = __importDefault(require("../pieces/knight"));
 const rook_1 = __importDefault(require("../pieces/rook"));
 const queen_1 = __importDefault(require("../pieces/queen"));
+const king_1 = __importDefault(require("../pieces/king"));
+const pawn_1 = __importDefault(require("../pieces/pawn"));
 class Grid {
     constructor(height, width, gameState) {
         this.height = height;
@@ -22,7 +24,7 @@ class Grid {
             return bishop_1.default;
         }
         else if (identifier.toLowerCase() === "k") {
-            return null; // King;
+            return king_1.default;
         }
         else if (identifier.toLowerCase() === "q") {
             return queen_1.default;
@@ -31,7 +33,7 @@ class Grid {
             return rook_1.default;
         }
         else if (identifier.toLowerCase() === "p") {
-            return null; //Pawn
+            return pawn_1.default;
         }
         else if (identifier.toLowerCase() === "n") {
             return knight_1.default;
@@ -53,7 +55,7 @@ class Grid {
             const pieceType = this.getPieceFromIdentifier(gameState[i]);
             let newCell;
             if (pieceType) {
-                const color = gameState[i].toLowerCase() === gameState[i] ? 'white' : 'black';
+                const color = gameState[i].toLowerCase() === gameState[i] ? 'black' : 'white';
                 const newPiece = new pieceType(color, i);
                 newCell = new cell_1.default(i, gameState[i], newPiece);
             }

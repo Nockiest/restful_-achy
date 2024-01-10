@@ -10,6 +10,7 @@ class Bishop extends defaultPiece_1.default {
         super(color, index);
         this.abbreviation = color === 'white' ? 'B' : 'b';
         this.movementFunctions.push(diagonal_move_1.default);
+        this.directions = ['up-left', 'up-right', 'down-left', 'down-right'];
     }
 }
 exports.default = Bishop;

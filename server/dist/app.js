@@ -19,7 +19,7 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 let game = null;
-const beginningState = ['x', 'n', 'b', 'x', 'x', 'b', 'n', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', '', '', '', 'Q', '', '', '', 'q', '', '', '', '', '', '', '', '', '', '', 'r', '', '', '', '', '', '', 'R', '', '', '', '', '', '', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'N', 'B', 'X', 'X', 'B', 'N', 'X',];
+const beginningState = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p', '', '', '', 'Q', '', '', '', 'q', '', '', '', '', '', '', '', '', '', '', 'r', '', '', '', '', '', '', 'R', '', '', '', '', '', '', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',];
 app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     game = null;
     game = new game_1.default(beginningState, 600);
@@ -63,26 +63,32 @@ app.post('/new_move', (req, res) => {
     });
 });
 const seen = []; // I have added this wierd code because of a json error
-app.get("/game_state", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (game) {
-        const cleanGame = JSON.stringify(game, (key, value) => {
-            if (typeof value === 'object' && value !== null) {
-                if (seen.includes(value)) {
-                    return '[Circular]';
+app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (game) {
+            const cleanGame = JSON.stringify(game, (key, value) => {
+                if (typeof value === 'object' && value !== null) {
+                    if (seen.includes(value)) {
+                        return '[Circular]';
+                    }
+                    seen.push(value);
                 }
-                seen.push(value);
-            }
-            return value;
-        });
-        res.json({
-            message: cleanGame,
-            board: game.getBoard(),
-        });
+                return value;
+            });
+            res.json({
+                message: cleanGame,
+                board: game.getBoard(),
+            });
+        }
+        else {
+            res.status(404).json({
+                error: 'Game not found',
+            });
+        }
     }
-    else {
-        res.status(404).json({
-            error: 'Game not found',
-        });
+    catch (error) {
+        // Send the error to the frontend
+        res.status(500).json(error);
     }
 }));
 app.listen(3001, () => {

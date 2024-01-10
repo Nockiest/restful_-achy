@@ -57,6 +57,7 @@ class Game {
     }
     beginGame() {
         console.log("BEGINNING GAME ");
+        console.log("test");
         if (!this.gameStarted) {
             console.log("Game has begun!");
             this.startCountingTime();
@@ -73,8 +74,9 @@ class Game {
             console.log("FROM PIECE NULL");
             return false;
         }
+        console.log(this.grid, "THIS GRID");
         const toCell = this.grid.getCellAtIndex(to);
-        console.log("Making move ", fromCell, 'to', toCell);
+        console.log("Making move ", fromCell, 'to', toCell, this.grid);
         console.log("CAN MOVE? ", fromCell.piece.canMove(to, this.grid));
         // code for checking if movement is valid
         return fromCell.piece.canMove(to, this.grid); //fromCell.piece.canMove(to, this.grid); // return if move is valid

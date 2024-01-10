@@ -1,4 +1,5 @@
 import Grid from "../grid/grid";
+import { diagonalDirections, straightDirections } from "./movementTypes";
 
  
 type ToLowercaseUppercase<T extends string> = `${Uppercase<T> & Lowercase<T>}`;
@@ -15,13 +16,13 @@ type Range<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate
  
 export type BoardIndex = Range<0, 63>
 export type Board = (PieceLetter | null)[];
-
+ 
 export type MovesComponentArgs = {
   startPosition: BoardIndex;
   pieceColor: PlayerColor;
   grid: Grid;
-  range?: number | null;
-  directions?: string[];
+  range: number | null;
+  directions?: Array<straightDirections | diagonalDirections>;
 };
 type ArrayLengthMutationKeys = 'splice' | 'push' | 'pop' | 'shift' | 'unshift' | number
 type ArrayItems<T extends Array<any>> = T extends Array<infer TItems> ? TItems : never

@@ -10,6 +10,7 @@ class Rook extends defaultPiece_1.default {
         super(color, index);
         this.abbreviation = color === 'white' ? 'R' : 'r';
         this.movementFunctions.push(straightMoveComp_1.default);
+        this.directions = ["up", "down", "left", "right"];
     }
 }
 exports.default = Rook;

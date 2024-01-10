@@ -8,6 +8,7 @@ export default class Rook extends Piece {
       super(color, index);
       this.abbreviation = color === 'white' ? 'R' : 'r';
       this.movementFunctions.push(straightMovesComponent );
+      this.directions = ["up", "down", "left", "right" ]   
     }
   }
   

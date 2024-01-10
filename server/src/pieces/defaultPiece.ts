@@ -1,4 +1,5 @@
 import Grid from "../grid/grid";
+import { diagonalDirections, straightDirections } from "../types/movementTypes";
 import { PlayerColor, BoardIndex, MovementComponent } from "../types/types";
 import { indexToCoords } from "../utils";
 
@@ -8,14 +9,16 @@ export default class Piece {
   moved: boolean;
   abbreviation: string;
   movementFunctions: Array<MovementComponent>;
-  range : number|null
-  constructor(color: PlayerColor, index: BoardIndex,  ) {
+  range : number|null;
+  directions:Array<straightDirections | diagonalDirections>;
+  constructor(color: PlayerColor, index: BoardIndex, directions:Array<straightDirections | diagonalDirections> =["up", "down", "left", "right", 'up-left', 'up-right', 'down-left', 'down-right']   ) {
     this.color = color;
     this.index = index;
     this.moved = false;
     this.range = null
     this.abbreviation =  color === 'white' ? 'X' : 'x';
     this.movementFunctions = [];
+    this.directions = directions
   }
 
   changeAbbreviationBasedOnColor() {
@@ -26,7 +29,7 @@ export default class Piece {
   }
   canMove(targetPosition: BoardIndex, grid: Grid) {
     for (const movementFunction of this.movementFunctions) {
-      if (movementFunction({startPosition:this.index, pieceColor:this.color, grid, range:this.range}).indexOf(targetPosition) !== -1) {
+      if (movementFunction({startPosition:this.index, pieceColor:this.color, grid:grid, range:this.range, directions:this.directions}).indexOf(targetPosition) !== -1) {
         
         return true;
       }

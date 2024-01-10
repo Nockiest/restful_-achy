@@ -6,6 +6,8 @@ import {   Fixed64LengthBoard, PieceLetter, BoardIndex } from "../types/types";
 import Knight from "../pieces/knight";
 import Rook from "../pieces/rook";
 import Queen from "../pieces/queen";
+import King from "../pieces/king";
+import Pawn from "../pieces/pawn";
 
 export default class Grid {
   private height: number;
@@ -24,13 +26,13 @@ export default class Grid {
     if (identifier.toLowerCase() === "b") {
       return Bishop;
     } else if  (identifier.toLowerCase() === "k") {
-      return null // King;
+      return King;
     }  else if  (identifier.toLowerCase() === "q") {
       return  Queen;
     } else if  (identifier.toLowerCase() === "r") {
       return Rook;
     } else if  (identifier.toLowerCase() === "p") {
-      return null //Pawn
+      return Pawn
     } else if  (identifier.toLowerCase() === "n") {
       return Knight;
     }else if  (identifier.toLowerCase() === "x") {
@@ -50,7 +52,7 @@ export default class Grid {
       const pieceType = this.getPieceFromIdentifier(gameState[i]);
       let newCell: Cell;
       if (pieceType){
-        const color = gameState[i].toLowerCase() === gameState[i] ? 'white' : 'black';
+        const color = gameState[i].toLowerCase() === gameState[i] ? 'black' : 'white';
         const newPiece = new pieceType(color, i as BoardIndex);
         
         newCell = new Cell(i, gameState[i], newPiece);

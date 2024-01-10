@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 let game: Game | null = null;
-const beginningState: Array<PieceLetter> = ['x','n','b','x','x','b','n','x', 'x','x','x','x','x','x','x','x','','','','Q','','','','q', '','','','','','','','',    '','','r','','','','','', '','R','','','','','','',  'X','X','X','X','X','X','X','X', 'X','N','B','X','X','B','N', 'X',] 
+const beginningState: Array<PieceLetter> = ['r','n','b','q','k','b','n','r', 'p','p','p','p','p','p','p','p','','','','Q','','','','q', '','','','','','','','',    '','','r','','','','','', '','R','','','','','','',  'P','P','P','P','P','P','P','P', 'R','N','B','Q','K','B','N', 'R',] 
 
 app.post("/create_game", async (req: any, res: any) => {
   game = null
@@ -58,25 +58,30 @@ app.post('/new_move', (req: any, res: any) => {
   });
 });
 const seen: Array< boolean> = [];// I have added this wierd code because of a json error
-app.get("/game_state", async (req: any, res: any) => {
-  if (game) {
-    const cleanGame = JSON.stringify(game, (key, value) => {
-      if (typeof value === 'object' && value !== null) {
-        if (seen.includes(value)) {
-          return '[Circular]';
+app.get('/game_state', async (req: Request, res: Response) => {
+  try {
+    if (game) {
+      const cleanGame = JSON.stringify(game, (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+          if (seen.includes(value)) {
+            return '[Circular]';
+          }
+          seen.push(value);
         }
-        seen.push(value);
-      }
-      return value;
-    });
-    res.json({
-      message: cleanGame,
-      board: game.getBoard(),
-    });
-  } else {
-    res.status(404).json({
-      error: 'Game not found',
-    });
+        return value;
+      });
+      res.json({
+        message: cleanGame,
+        board: game.getBoard(),
+      });
+    } else {
+      res.status(404).json({
+        error: 'Game not found',
+      });
+    }
+  } catch (error) {
+    // Send the error to the frontend
+    res.status(500).json(  error   );
   }
 });
 
