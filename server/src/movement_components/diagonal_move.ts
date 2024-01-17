@@ -64,7 +64,7 @@ const diagonalMovesComponent = ({
         }
       }
     } else {
-      console.error(`Invalid direction: ${direction}`);
+      console.error(`Invalid direction: ${direction} ${directions} ${Object.keys(directionOffsets)}`);
     }
   });
 

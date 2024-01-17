@@ -49,7 +49,7 @@ const diagonalMovesComponent = ({ startPosition, pieceColor, grid, range = 8, di
             }
         }
         else {
-            console.error(`Invalid direction: ${direction}`);
+            console.error(`Invalid direction: ${direction} ${directions} ${Object.keys(directionOffsets)}`);
         }
     });
     console.log(startPosition, possibleMoves);

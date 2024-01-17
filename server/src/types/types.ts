@@ -23,6 +23,7 @@ export type MovesComponentArgs = {
   grid: Grid;
   range: number | null;
   directions?: Array<straightDirections | diagonalDirections>;
+  moved: boolean  
 };
 type ArrayLengthMutationKeys = 'splice' | 'push' | 'pop' | 'shift' | 'unshift' | number
 type ArrayItems<T extends Array<any>> = T extends Array<infer TItems> ? TItems : never

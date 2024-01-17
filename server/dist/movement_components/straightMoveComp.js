@@ -50,7 +50,7 @@ const straightMovesComponent = ({ startPosition, pieceColor, grid, range, direct
             console.error(`Invalid direction: ${direction}`);
         }
     });
-    console.log(startPosition, possibleMoves);
+    console.log('possible straight moves', startPosition, possibleMoves);
     return possibleMoves;
 };
 exports.default = straightMovesComponent;

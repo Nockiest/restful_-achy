@@ -65,7 +65,7 @@ const straightMovesComponent = ({
     }
   });
 
-  console.log(startPosition, possibleMoves);
+  console.log('possible straight moves',startPosition, possibleMoves);
   return possibleMoves;
 };
 

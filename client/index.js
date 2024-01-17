@@ -9,6 +9,16 @@ const createGameData = {
   gameType: 'Chess',
 };
 
+function showError(errorString  ){
+  console.error(errorString);
+  if (typeof errorString !== "string"){
+    document.getElementById("debug").innerHTML = "printing value that is not a string "+ errorString
+  } else {
+   
+    document.getElementById("debug").innerHTML = errorString
+  }
+ 
+}
 document.getElementById('new-move-btn').addEventListener('click', submitMove);
 
 function renderBoard(board) {
@@ -29,7 +39,7 @@ function renderBoard(board) {
       if (piece) {
         const pieceElement = document.createElement('div');
         pieceElement.classList.add('piece');
-        pieceElement.textContent = piece.piece;
+        pieceElement.textContent = piece.abbreviation;
         pieceElement.style.color = piece.color;
         square.appendChild(pieceElement);
       }  
@@ -64,17 +74,19 @@ export function submitMove() {
       })
       .catch(error => {
         console.error('New Move Axios error:', error);
+        showError(error  )
       });
   } else {
-    console.error('Invalid input values. Please enter valid indices.');
+    showError('Invalid input values. Please enter valid indices.'  )
+  
   }
 }
 
+// create game function
 axios.post(createGameUrl, createGameData)
   .then(response => {
     // Handle create game response if needed
     console.log(response.data.message);
-
     // Wait for the game to initialize before making further calls
     return axios.post(beginGameUrl);
   })
@@ -87,7 +99,10 @@ axios.post(createGameUrl, createGameData)
   })
   .then(response => {
     if (!response.ok) {
+      showError('problem with the server'  )
       throw new Error(`HTTP error! Status: ${response.status}`);
+    
+  
     }
     return response.json();
   })
@@ -111,6 +126,8 @@ axios.post(createGameUrl, createGameData)
   })
   .catch(error => {
     console.error('Error:', error);
+    renderBoard(error);
+
   });
 
 setTimeout(() => {
@@ -120,13 +137,17 @@ setTimeout(() => {
     })
     .catch(error => {
       console.error('Begin Game Axios error:', error);
+      renderBoard(`problem with beginning the game ${error}`);
+
     });
 }, 1000);
-
+ 
 fetch(gameStateUrl)
   .then(response => {
     if (!response.ok) {
+      renderBoard(`HTTP error! Status: ${response.status}`);
       throw new Error(`HTTP error! Status: ${response.status}`);
+      
     }
 
     return response.json();
@@ -136,14 +157,15 @@ fetch(gameStateUrl)
     renderBoard(data.board);
   })
   .catch(error => {
+    renderBoard(`Fetch Game State error:  ${error}`,);
     console.error('Fetch Game State error:', error);
   });
 
 // Assuming newMoveData contains the necessary information for the new move
-const newMoveData = {
-  from: 3,
-  to: 3
-};
+// const newMoveData = {
+//   from: 3,
+//   to: 3
+// };
 
 // axios.post(newMoveUrl, newMoveData)
 //   .then(response => {

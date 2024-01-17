@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils_1 = require("../utils");
 class Piece {
     constructor(color, index, directions = ["up", "down", "left", "right", 'up-left', 'up-right', 'down-left', 'down-right']) {
         this.color = color;
@@ -19,7 +18,7 @@ class Piece {
     }
     canMove(targetPosition, grid) {
         for (const movementFunction of this.movementFunctions) {
-            if (movementFunction({ startPosition: this.index, pieceColor: this.color, grid: grid, range: this.range, directions: this.directions }).indexOf(targetPosition) !== -1) {
+            if (movementFunction({ startPosition: this.index, pieceColor: this.color, grid: grid, range: this.range, directions: this.directions, moved: this.moved }).indexOf(targetPosition) !== -1) {
                 return true;
             }
         }
@@ -27,29 +26,35 @@ class Piece {
     }
 }
 exports.default = Piece;
-class OneMoveForwardComponent {
-    canMove(currentPosition, targetPosition) {
-        const { row, column } = (0, utils_1.indexToCoords)(currentPosition, 8);
-        const { row: targetRow, column: targetColumn } = (0, utils_1.indexToCoords)(targetPosition, 8);
-        return (Math.abs(targetRow - row) === 1 &&
-            targetColumn === column);
-    }
-}
-class DiagonalMovementComponent {
-    canMove(currentPosition, targetPosition) {
-        const { row, column } = (0, utils_1.indexToCoords)(currentPosition, 8);
-        const { row: targetRow, column: targetColumn } = (0, utils_1.indexToCoords)(targetPosition, 8);
-        return (Math.abs(targetRow - row) === 1 &&
-            Math.abs(targetColumn - column) === 1);
-    }
-}
-class LShapeMoveComponent {
-    canMove(currentPosition, targetPosition) {
-        const { row, column } = (0, utils_1.indexToCoords)(currentPosition, 8);
-        const { row: targetRow, column: targetColumn } = (0, utils_1.indexToCoords)(targetPosition, 8);
-        return ((Math.abs(targetRow - row) === 2 &&
-            Math.abs(targetColumn - column) === 1) ||
-            (Math.abs(targetRow - row) === 1 &&
-                Math.abs(targetColumn - column) === 2));
-    }
-}
+// class OneMoveForwardComponent {
+//   canMove(currentPosition: BoardIndex, targetPosition: BoardIndex) {
+//     const { row, column } = indexToCoords(currentPosition, 8);
+//     const { row: targetRow, column: targetColumn } = indexToCoords(targetPosition, 8);
+//     return (
+//       Math.abs(targetRow - row) === 1 &&
+//       targetColumn === column
+//     );
+//   }
+// }
+// class DiagonalMovementComponent {
+//   canMove(currentPosition: BoardIndex, targetPosition: BoardIndex) {
+//     const { row, column } = indexToCoords(currentPosition, 8);
+//     const { row: targetRow, column: targetColumn } = indexToCoords(targetPosition, 8);
+//     return (
+//       Math.abs(targetRow - row) === 1 &&
+//       Math.abs(targetColumn - column) === 1
+//     );
+//   }
+// }
+// class LShapeMoveComponent {
+//   canMove(currentPosition: BoardIndex, targetPosition: BoardIndex) {
+//     const { row, column } = indexToCoords(currentPosition, 8);
+//     const { row: targetRow, column: targetColumn } = indexToCoords(targetPosition, 8);
+//     return (
+//       (Math.abs(targetRow - row) === 2 &&
+//         Math.abs(targetColumn - column) === 1) ||
+//       (Math.abs(targetRow - row) === 1 &&
+//         Math.abs(targetColumn - column) === 2)
+//     );
+//   }
+// }

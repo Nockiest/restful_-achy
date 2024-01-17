@@ -1,0 +1,1 @@
+run npx tsc -w in the server folder NOT the src folder

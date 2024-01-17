@@ -23,7 +23,6 @@ const beginningState = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r', 'p', 'p', 'p', '
 app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     game = null;
     game = new game_1.default(beginningState, 600);
-    // console.log(game)
     const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
     res.json({
         message: 'Success',

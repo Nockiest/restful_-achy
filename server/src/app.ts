@@ -14,7 +14,6 @@ const beginningState: Array<PieceLetter> = ['r','n','b','q','k','b','n','r', 'p'
 app.post("/create_game", async (req: any, res: any) => {
   game = null
   game = new Game(beginningState, 600);
-  // console.log(game)
   const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
 
   res.json({
