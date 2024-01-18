@@ -1,4 +1,5 @@
 
+import castlingComponent from "../movement_components/castling";
 import diagonalMovesComponent from "../movement_components/diagonal_move";
 import straightMovesComponent from "../movement_components/straightMoveComp";
 import { BoardIndex, PlayerColor } from "../types/types";
@@ -8,8 +9,7 @@ export default class King extends Piece {
     constructor(color: PlayerColor, index: BoardIndex) {
       super(color, index);
       this.abbreviation = color === 'white' ? 'K' : 'k';
-      this.movementFunctions.push(diagonalMovesComponent, straightMovesComponent);
+      this.movementFunctions.push(diagonalMovesComponent, straightMovesComponent, castlingComponent);
       this.range = 1
     }
   }
-  

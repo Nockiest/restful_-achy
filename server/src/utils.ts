@@ -16,3 +16,8 @@ export function indexToCoords(index: number, numberOfColumns: number): { row: nu
   const column = index % numberOfColumns;
   return { row, column };
 }
+
+export function caseMatches(char1:string, char2:string) {
+  return (char1 === char1.toUpperCase() && char2 === char2.toUpperCase()) ||
+         (char1 === char1.toLowerCase() && char2 === char2.toLowerCase());
+}

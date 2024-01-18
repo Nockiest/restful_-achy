@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.indexToCoords = exports.coordsToIndex = exports.checkInGameBounds = void 0;
+exports.caseMatches = exports.indexToCoords = exports.coordsToIndex = exports.checkInGameBounds = void 0;
 function checkInGameBounds(index) {
     if (index < 0 || index >= 64) {
         throw new Error('Index out of bounds');
@@ -21,3 +21,8 @@ function indexToCoords(index, numberOfColumns) {
     return { row, column };
 }
 exports.indexToCoords = indexToCoords;
+function caseMatches(char1, char2) {
+    return (char1 === char1.toUpperCase() && char2 === char2.toUpperCase()) ||
+        (char1 === char1.toLowerCase() && char2 === char2.toLowerCase());
+}
+exports.caseMatches = caseMatches;

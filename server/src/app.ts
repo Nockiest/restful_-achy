@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
- 
+
 import cors from "cors";
 import Game from "./game"; // Assuming your file is named "game.ts"
 import { PieceLetter } from "./types/types";
@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 let game: Game | null = null;
-const beginningState: Array<PieceLetter> = ['r','n','b','q','k','b','n','r', 'p','p','p','p','p','p','p','p','','','','Q','','','','q', '','','','','','','','',    '','','r','','','','','', '','R','','','','','','',  'P','P','P','P','P','P','P','P', 'R','N','B','Q','K','B','N', 'R',] 
+const beginningState: Array<PieceLetter> = ['r','','','','k','','','r', 'p','','','','p','','','','','','','Q','','','','q', '','','','','','','','',    '','','r','','','','','', '','R','','','','','','',  'P','P','P','P','P','P','P','P', 'R','','','Q','K','','', 'R',]
 
 app.post("/create_game", async (req: any, res: any) => {
   game = null
@@ -31,7 +31,7 @@ app.post("/begin_game", async (req: Request, res: Response) => {
     throw new Error(" GAME WAS NOT INITIATED");
   }
 });
- 
+
 app.post('/new_move', (req: any, res: any) => {
   const { from, to } = req.body;
   let moveSuccessful = false;
