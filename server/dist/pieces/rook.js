@@ -8,6 +8,7 @@ const defaultPiece_1 = __importDefault(require("./defaultPiece"));
 class Rook extends defaultPiece_1.default {
     constructor(color, index) {
         super(color, index);
+        Object.assign(this, defaultPiece_1.default, CastlingExecutor);
         this.abbreviation = color === 'white' ? 'R' : 'r';
         this.movementFunctions.push(straightMoveComp_1.default);
         this.directions = ["up", "down", "left", "right"];

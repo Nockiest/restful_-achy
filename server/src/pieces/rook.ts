@@ -5,10 +5,14 @@ import Piece from "./defaultPiece";
 
 export default class Rook extends Piece {
     constructor(color: PlayerColor, index: BoardIndex) {
+
       super(color, index);
+      Object.assign(this, Piece, CastlingExecutor);
       this.abbreviation = color === 'white' ? 'R' : 'r';
       this.movementFunctions.push(straightMovesComponent );
-      this.directions = ["up", "down", "left", "right" ]   
+      this.directions = ["up", "down", "left", "right" ]
+
     }
+
+
   }
-  

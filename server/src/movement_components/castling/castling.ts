@@ -1,7 +1,7 @@
-import King from "../pieces/king";
-import { MovesComponentArgs, PieceLetter, PlayerColor } from "../types/types";
-import { caseMatches } from "../utils";
-import straightMovesComponent from "./straightMoveComp";
+import King from "../../pieces/king";
+import { MovesComponentArgs, PieceLetter, PlayerColor } from "../../types/types";
+import { caseMatches } from "../../utils";
+import straightMovesComponent from "../straightMoveComp";
 
 const castlingComponent = ({
   startPosition,
@@ -14,10 +14,7 @@ const castlingComponent = ({
   if (moved) {
     return [];
   }
-  let edgePieces =
-    pieceColor == "white"
-      ? [grid.getPieceAtIndex(56), grid.getPieceAtIndex(63)]
-      : [grid.getPieceAtIndex(0), grid.getPieceAtIndex(8)];
+
   let longCastleRook =
     pieceColor == "white" ? grid.getPieceAtIndex(56) : grid.getPieceAtIndex(0);
   let shortCastleRook =
@@ -33,6 +30,7 @@ const castlingComponent = ({
     directions,
     moved,
   });
+
   function checkIsCorrectRook(
     pieceColor: PlayerColor,
     rook: PieceLetter | null | undefined

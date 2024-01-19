@@ -1,5 +1,5 @@
 
-import castlingComponent from "../movement_components/castling";
+import castlingComponent from "../movement_components/castling/castling";
 import diagonalMovesComponent from "../movement_components/diagonal_move";
 import straightMovesComponent from "../movement_components/straightMoveComp";
 import { BoardIndex, PlayerColor } from "../types/types";
@@ -12,4 +12,6 @@ export default class King extends Piece {
       this.movementFunctions.push(diagonalMovesComponent, straightMovesComponent, castlingComponent);
       this.range = 1
     }
+
+    
   }

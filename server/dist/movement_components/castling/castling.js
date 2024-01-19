@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const straightMoveComp_1 = __importDefault(require("./straightMoveComp"));
+const straightMoveComp_1 = __importDefault(require("../straightMoveComp"));
 const castlingComponent = ({ startPosition, pieceColor, grid, range, directions = ["left", "right"], moved, }) => {
     if (moved) {
         return [];
