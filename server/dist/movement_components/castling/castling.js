@@ -21,7 +21,6 @@ const castlingComponent = ({ startPosition, pieceColor, grid, range, directions 
         moved,
     });
     function checkIsCorrectRook(pieceColor, rook) {
-        console.log(rook);
         if (rook === null || rook === undefined) {
             return false;
         }
@@ -33,7 +32,6 @@ const castlingComponent = ({ startPosition, pieceColor, grid, range, directions 
     }
     // calculate left castle
     function checkLongCastle() {
-        console.log(pieceColor, ' xxx', freeSpaces.indexOf(shortCastleTargets[0]), freeSpaces, longCastleTargets[0], checkIsCorrectRook(pieceColor, longCastleRook));
         if (!checkIsCorrectRook(pieceColor, longCastleRook)) {
             console.log('a');
             return false;
@@ -55,7 +53,6 @@ const castlingComponent = ({ startPosition, pieceColor, grid, range, directions 
         }
         return true;
     }
-    console.log(longCastleRook);
     let possibleMoves = [];
     if (checkLongCastle()) {
         possibleMoves.push(longCastleTargets[0]);

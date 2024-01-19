@@ -2,7 +2,7 @@ const axios = require('axios');
 const MockAdapter = require('axios-mock-adapter');
 
 // Import the function that contains the axios.post call
-const {  submitMove  } = require('../../client/index.js');
+const {  submitMove  } = require('../client/index.js');
 
 describe('submitMove', () => {
   let axiosMock;

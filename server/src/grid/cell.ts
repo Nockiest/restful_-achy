@@ -1,5 +1,5 @@
 import Piece from "../pieces/defaultPiece";
-import { PieceLetter } from "../types/types";
+import { PieceLetter, PieceType } from "../types/types";
 
 export default class Cell {
     readonly index: number;
@@ -14,18 +14,18 @@ export default class Cell {
 
     changeValue(newValue: PieceLetter | null): void {
         // if (newValue === null) {
-            
+
         //     console.log("DON'T CHANGE VALUE TO NULL");
         //     return;
         // }
-    
+
         // if (typeof newValue !== "string") {
         //     console.log("DON'T CHANGE VALUE TO SOMETHING DIFFERENT THAN A STRING");
         //     return;
         // }
-    
+
         this.letterValue = newValue;
-    
+
         console.log("Value changed successfully", this.letterValue);
     }
 }

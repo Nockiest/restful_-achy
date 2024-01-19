@@ -57,7 +57,6 @@ class Game {
     }
     beginGame() {
         console.log("BEGINNING GAME ");
-        console.log("test");
         if (!this.gameStarted) {
             console.log("Game has begun!");
             this.startCountingTime();

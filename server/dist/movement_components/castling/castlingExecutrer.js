@@ -21,39 +21,35 @@ class CastlingExecutor extends defaultPiece_1.default {
         };
     }
     executeCastle(grid, pattern, accompanyingPiece) {
-        grid.makeMove(this.getIndex(), pattern.targetPositions[0]);
+        console.log('patern', pattern);
+        //   grid.makeMove(this.getIndex(), pattern.targetPositions[0]);
         accompanyingPiece.participateCastle(grid, pattern.targetPositions[1]);
     }
     changeIndex(to, grid) {
-        super.changeIndex(to, grid);
-        if (this.moved) {
-            return;
-        }
         const castlingPattern = this.getCastlingPattern(this.getIndex(), to);
-        if (!castlingPattern) {
-            return;
+        console.log('castling pattern', castlingPattern);
+        if (castlingPattern) {
+            const accompanyingPiece = grid.getPieceAtIndex(castlingPattern.otherPieceCurPosition);
+            if (accompanyingPiece instanceof CastlingCompanion) {
+                this.executeCastle(grid, castlingPattern, accompanyingPiece);
+            }
+            else {
+                console.log("Failed to find a valid accompanying piece for castling");
+            }
         }
-        const accompanyingPiece = grid.getPieceAtIndex(castlingPattern.otherPieceCurPosition);
-        if (accompanyingPiece instanceof CastlingCompanion) {
-            this.executeCastle(grid, castlingPattern, accompanyingPiece);
-        }
-    }
-    participateCastle(grid, targetPosition) {
-        grid.makeMove(this.getIndex(), targetPosition);
+        super.changeIndex(to, grid);
     }
     getCastlingPattern(from, to) {
-        if (this.moved) {
-            return null;
-        }
-        if (from - to === 2) {
+        console.log(from - to);
+        if (Math.abs(from - to) === 3) {
             return {
                 targetPositions: this.color == "white" ? [57, 58] : [1, 2],
                 otherPieceCurPosition: this.color == "white" ? 56 : 0,
             };
         }
-        else if (from - to === -2) {
+        else if (Math.abs(from - to) === 2) {
             return {
-                targetPositions: this.color == "white" ? [57, 58] : [1, 2],
+                targetPositions: this.color == "white" ? [62, 61] : [6, 5],
                 otherPieceCurPosition: this.color == "white" ? 63 : 0,
             };
         }

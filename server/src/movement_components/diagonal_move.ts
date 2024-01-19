@@ -1,6 +1,6 @@
 import Grid from '../grid/grid';
 import { BoardIndex, PlayerColor, MovesComponentArgs,   } from '../types/types';
- 
+
 
 const diagonalMovesComponent = ({
   startPosition,
@@ -68,7 +68,7 @@ const diagonalMovesComponent = ({
     }
   });
 
-  console.log(startPosition, possibleMoves);
+ 
   return possibleMoves;
 };
 

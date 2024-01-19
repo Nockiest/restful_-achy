@@ -54,7 +54,7 @@ export default class Game {
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         if (!checkInGameBounds){
-          board.push(null) 
+          board.push(null)
           continue}
         const cell = this.grid.getCellAtIndex(row * 8 + col as BoardIndex);
         const piece = cell?.piece
@@ -66,7 +66,7 @@ export default class Game {
 
   public beginGame(): void {
     console.log("BEGINNING GAME ");
-    console.log("test")
+  
     if (!this.gameStarted) {
       console.log("Game has begun!");
       this.startCountingTime();

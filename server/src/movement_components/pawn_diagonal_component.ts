@@ -1,7 +1,8 @@
+import Piece from "../pieces/defaultPiece";
 import { diagonalDirections, straightDirections } from "../types/movementTypes";
 import { BoardIndex, MovesComponentArgs } from "../types/types";
 import diagonalMovesComponent from "./diagonal_move";
- 
+
 const pawnDiagonalMoveComponent = ({
   startPosition,
   pieceColor,
@@ -26,12 +27,12 @@ const pawnDiagonalMoveComponent = ({
   });
   const filteredMoves = possibleMoves.filter((move) => {
     const cellValue = grid.getPieceAtIndex(move as BoardIndex);
-  
+
     // Filter out values that are either null, undefined, or empty strings
-    return cellValue !== null && cellValue !== undefined && cellValue !== '';
+    return cellValue !== null && cellValue !== undefined &&   !(cellValue instanceof Piece);
   });
 
-  console.log('possible diagonal moves', startPosition, filteredMoves);
+ 
   return filteredMoves;
 };
 

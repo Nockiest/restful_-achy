@@ -36,7 +36,7 @@ const castlingComponent = ({
     pieceColor: PlayerColor,
     rook: Piece | null | undefined
   ) {
-    console.log(rook);
+
     if (rook === null || rook === undefined) {
       return false;
     }
@@ -49,7 +49,7 @@ const castlingComponent = ({
   }
   // calculate left castle
   function checkLongCastle() {
-    console.log(pieceColor, ' xxx',freeSpaces.indexOf(shortCastleTargets[0]),freeSpaces, longCastleTargets[0]  , checkIsCorrectRook(pieceColor, longCastleRook))
+
     if (!checkIsCorrectRook(pieceColor, longCastleRook)) {
         console.log('a')
         return false;
@@ -73,7 +73,7 @@ const castlingComponent = ({
     return true;
   }
 
-  console.log(longCastleRook);
+  
   let possibleMoves = [];
   if (checkLongCastle()) {
     possibleMoves.push(longCastleTargets[0]);

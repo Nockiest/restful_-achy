@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const defaultPiece_1 = __importDefault(require("../pieces/defaultPiece"));
 const diagonal_move_1 = __importDefault(require("./diagonal_move"));
 const pawnDiagonalMoveComponent = ({ startPosition, pieceColor, grid, range, directions, moved }) => {
     const real_move_range = 1;
@@ -19,9 +20,8 @@ const pawnDiagonalMoveComponent = ({ startPosition, pieceColor, grid, range, dir
     const filteredMoves = possibleMoves.filter((move) => {
         const cellValue = grid.getPieceAtIndex(move);
         // Filter out values that are either null, undefined, or empty strings
-        return cellValue !== null && cellValue !== undefined && cellValue !== '';
+        return cellValue !== null && cellValue !== undefined && !(cellValue instanceof defaultPiece_1.default);
     });
-    console.log('possible diagonal moves', startPosition, filteredMoves);
     return filteredMoves;
 };
 exports.default = pawnDiagonalMoveComponent;
