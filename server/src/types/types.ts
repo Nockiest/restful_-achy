@@ -1,5 +1,5 @@
 import Grid from "../grid/grid";
-import CastlingExecutor from "../movement_components/castling/castlingExecutrer";
+import CastlingExecutor, { CastlingCompanion } from "../movement_components/castling/castlingExecutrer";
 import Bishop from "../pieces/bishop";
 import King from "../pieces/king";
 import Knight from "../pieces/knight";
@@ -14,7 +14,7 @@ export type PieceLetter  = ""|'r'| 'n'| 'b'| 'q'| 'k'| 'p'  | 'R'| 'N'| 'B'| 'Q'
 export type PlayerColor = 'white'| 'black'
 export type PieceType = {
     abreviation: PieceLetter
-} & King|Queen|Pawn|Bishop|Knight|Rook|CastlingExecutor
+} & King|Queen|Pawn|Bishop|Knight|Rook|CastlingExecutor|CastlingCompanion
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
   ? Acc[number]
   : Enumerate<N, [...Acc, Acc['length']]>

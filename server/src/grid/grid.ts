@@ -2,7 +2,7 @@ import Cell from "./cell";
 import { checkInGameBounds } from "../utils";
 import Piece from "../pieces/defaultPiece";
 import Bishop from "../pieces/bishop";
-import {   Fixed64LengthBoard, PieceLetter, BoardIndex } from "../types/types";
+import {   Fixed64LengthBoard, PieceLetter, BoardIndex, PieceType } from "../types/types";
 import Knight from "../pieces/knight";
 import Rook from "../pieces/rook";
 import Queen from "../pieces/queen";
@@ -18,7 +18,7 @@ export default class Grid {
     this.height = height;
     this.width = width;
     this.cells = this.createCellsAndPieces(gameState);
-    
+
   }
 
   private getPieceFromIdentifier(identifier: PieceLetter): typeof Piece |null{
@@ -54,16 +54,16 @@ export default class Grid {
       if (pieceType){
         const color = gameState[i].toLowerCase() === gameState[i] ? 'black' : 'white';
         const newPiece = new pieceType(color, i as BoardIndex);
-        
+
         newCell = new Cell(i, gameState[i], newPiece);
-        
+
       } else {
         newCell =  new Cell(i, gameState[i], null)
       }
-      
+
       cells.push(newCell);
     }
-    
+
     return cells;
   }
 
@@ -93,9 +93,9 @@ export default class Grid {
     }
   }
 
-  public getPieceAtIndex(index: BoardIndex): PieceLetter | null| undefined {
+  public getPieceAtIndex(index: BoardIndex): PieceType  | null| undefined {
     if (checkInGameBounds(index)) {
-      return this.cells[index].letterValue;
+      return this.cells[index].piece;
     }
   }
 
@@ -110,10 +110,8 @@ export default class Grid {
       this.cells[from].letterValue = '';
       this.cells[to].piece = pieceFrom;
       this.cells[from].piece = null;
-
       if (pieceFrom) {
-        pieceFrom.index = to;
-        pieceFrom.moved = true;
+        pieceFrom.changeIndex(to, this) ;
       }
 
       // this.logPieces();

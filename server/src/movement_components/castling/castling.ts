@@ -1,3 +1,4 @@
+import Piece from "../../pieces/defaultPiece";
 import King from "../../pieces/king";
 import { MovesComponentArgs, PieceLetter, PlayerColor } from "../../types/types";
 import { caseMatches } from "../../utils";
@@ -33,7 +34,7 @@ const castlingComponent = ({
 
   function checkIsCorrectRook(
     pieceColor: PlayerColor,
-    rook: PieceLetter | null | undefined
+    rook: Piece | null | undefined
   ) {
     console.log(rook);
     if (rook === null || rook === undefined) {
@@ -41,7 +42,7 @@ const castlingComponent = ({
     }
 
     const correctString = pieceColor == "white" ? "R" : "r";
-    if (rook != correctString) {
+    if (rook.abbreviation != correctString) {
       return false;
     }
     return true;

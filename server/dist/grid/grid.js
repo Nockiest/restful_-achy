@@ -88,7 +88,7 @@ class Grid {
     }
     getPieceAtIndex(index) {
         if ((0, utils_1.checkInGameBounds)(index)) {
-            return this.cells[index].letterValue;
+            return this.cells[index].piece;
         }
     }
     makeMove(from, to) {
@@ -102,8 +102,7 @@ class Grid {
             this.cells[to].piece = pieceFrom;
             this.cells[from].piece = null;
             if (pieceFrom) {
-                pieceFrom.index = to;
-                pieceFrom.moved = true;
+                pieceFrom.changeIndex(to, this);
             }
             // this.logPieces();
         }

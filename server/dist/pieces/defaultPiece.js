@@ -10,6 +10,13 @@ class Piece {
         this.movementFunctions = [];
         this.directions = directions;
     }
+    changeIndex(targetPosition, grid) {
+        this.index = targetPosition;
+        this.moved = true;
+    }
+    getIndex() {
+        return this.index;
+    }
     changeAbbreviationBasedOnColor() {
         // This function will change the abbreviation to uppercase when the piece is white
         if (this.color === "white") {

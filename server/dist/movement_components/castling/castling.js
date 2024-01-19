@@ -26,7 +26,7 @@ const castlingComponent = ({ startPosition, pieceColor, grid, range, directions 
             return false;
         }
         const correctString = pieceColor == "white" ? "R" : "r";
-        if (rook != correctString) {
+        if (rook.abbreviation != correctString) {
             return false;
         }
         return true;
