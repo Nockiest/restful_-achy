@@ -12,11 +12,12 @@ export default class Game {
   private checkedPlayer: string = "none";
   private timeInterval: NodeJS.Timeout | null = null;
   public gameStarted: boolean = false;
-
-  constructor(gameState: Array<PieceLetter>, gameTime: number) {
+  public gameId: string
+  constructor(gameState: Array<PieceLetter>, gameTime: number, gameId:string) {
     this.grid = new Grid(8, 8, gameState);
     this.gameTime = gameTime;
     this.players = this.generatePlayers();
+    this.gameId = gameId
   }
 
   private generatePlayers(): Player[] {
@@ -63,10 +64,23 @@ export default class Game {
     }
     return board;
   }
-
+ public getSimplifiedBoard(): Array<PieceLetter|null|undefined>{
+  const board:  Array<PieceLetter|null|undefined>  = [];
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        if (!checkInGameBounds){
+          board.push(null)
+          continue}
+        const cell = this.grid.getCellAtIndex(row * 8 + col as BoardIndex);
+        const piece = cell?.piece
+        board.push(piece?.abbreviation as PieceLetter);
+      }
+    }
+    return board;
+ }
   public beginGame(): void {
     console.log("BEGINNING GAME ");
-  
+
     if (!this.gameStarted) {
       console.log("Game has begun!");
       this.startCountingTime();

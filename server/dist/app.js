@@ -13,35 +13,53 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const uuid_1 = require("uuid");
 const cors_1 = __importDefault(require("cors"));
 const game_1 = __importDefault(require("./game")); // Assuming your file is named "game.ts"
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-let game = null;
+let games = [];
 const beginningState = ['r', '', '', '', 'k', '', '', 'r', 'p', '', '', '', 'p', '', '', '', '', '', '', 'Q', '', '', '', 'q', '', '', '', '', '', '', '', '', '', '', 'r', '', '', '', '', '', '', 'R', '', '', '', '', '', '', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'R', '', '', 'Q', 'K', '', '', 'R',];
+function findGame(games, gameId) {
+    if (games === undefined || games == null) {
+        return null;
+    }
+    return games.find((onegame) => (onegame === null || onegame === void 0 ? void 0 : onegame.gameId) === gameId) || null;
+}
+app.get('/game_ids', (req, res) => {
+    const gameIds = games.map((game) => game.gameId);
+    res.json(gameIds);
+});
 app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    game = null;
-    game = new game_1.default(beginningState, 600);
-    const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
+    console.log('recieved');
+    let newGame = new game_1.default(beginningState, 600, (0, uuid_1.v4)());
+    games.push(newGame);
+    const simplifiedBoard = newGame.getSimplifiedBoard(); // Assuming you have a getBoard method in your Game class
+    console.log('Success', simplifiedBoard, newGame === null || newGame === void 0 ? void 0 : newGame.gameStarted);
     res.json({
         message: 'Success',
-        game,
+        newGame,
         board: simplifiedBoard,
-        initialized: game === null || game === void 0 ? void 0 : game.gameStarted, // Include the initialization status
+        initialized: newGame === null || newGame === void 0 ? void 0 : newGame.gameStarted, // Include the initialization status
     });
 }));
 app.post("/begin_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { gameId } = req.body;
+    console.log(games, gameId, findGame(games, gameId));
+    console.log(gameId);
+    const game = findGame(games, gameId);
     if (game) {
         game.beginGame();
     }
     else {
-        throw new Error(" GAME WAS NOT INITIATED");
+        console.error(`GAME DOESNT EXIST ${gameId}`);
     }
 }));
 app.post('/new_move', (req, res) => {
-    const { from, to } = req.body;
+    const { from, to, gameId } = req.body;
     let moveSuccessful = false;
+    const game = findGame(games, gameId);
     if (from === undefined || to === undefined || game === null) {
         // console.log(from, to);
         return res.status(400).json({ error: 'There was a problem with the new move', values: { from, to, game } });
@@ -53,7 +71,7 @@ app.post('/new_move', (req, res) => {
         moveSuccessful = true;
     }
     // Extract necessary information from the game object to avoid circular reference
-    const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
+    const simplifiedBoard = game.getSimplifiedBoard(); // Assuming you have a getBoard method in your Game class
     console.log('x', moveSuccessful);
     res.json({
         message: moveSuccessful,
@@ -63,8 +81,12 @@ app.post('/new_move', (req, res) => {
 });
 const seen = []; // I have added this wierd code because of a json error
 app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { gameId } = req.query;
+    const game = findGame(games, gameId);
+    console.log('game found', req.body, gameId, game);
     try {
         if (game) {
+            console.log(game.getSimplifiedBoard());
             const cleanGame = JSON.stringify(game, (key, value) => {
                 if (typeof value === 'object' && value !== null) {
                     if (seen.includes(value)) {
@@ -76,7 +98,28 @@ app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, function*
             });
             res.json({
                 message: cleanGame,
-                board: game.getBoard(),
+                board: game.getSimplifiedBoard(),
+            });
+        }
+        else {
+            res.status(404).json({
+                error: 'Game not found',
+            });
+        }
+    }
+    catch (error) {
+        // Send the error to the frontend
+        res.status(500).json(error);
+    }
+}));
+app.post('/join_game', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { gameId } = req.body;
+    const game = findGame(games, gameId);
+    try {
+        if (game) {
+            res.json({
+                message: game,
+                board: game.getSimplifiedBoard(),
             });
         }
         else {

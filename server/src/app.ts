@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-
+import { v4 as uuidv4 } from 'uuid';
 import cors from "cors";
 import Game from "./game"; // Assuming your file is named "game.ts"
 import { PieceLetter } from "./types/types";
@@ -8,33 +8,61 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-let game: Game | null = null;
+let games: Game[ ] = [ ];
 const beginningState: Array<PieceLetter> = ['r','','','','k','','','r', 'p','','','','p','','','','','','','Q','','','','q', '','','','','','','','',    '','','r','','','','','', '','R','','','','','','',  'P','P','P','P','P','P','P','P', 'R','','','Q','K','','', 'R',]
 
-app.post("/create_game", async (req: any, res: any) => {
-  game = null
-  game = new Game(beginningState, 600);
-  const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
+function findGame(games: Game[], gameId: string): Game | null {
 
+
+  if (games === undefined || games == null) {
+    return null;
+  }
+  return games.find((onegame) => onegame?.gameId === gameId) || null;
+}
+
+app.get('/game_ids', (req: Request, res: Response) => {
+
+  const gameIds = games.map((game) => game.gameId);
+  res.json(gameIds);
+});
+
+app.post("/create_game", async (req: any, res: any) => {
+  console.log('recieved')
+  let newGame =new Game(beginningState, 600, uuidv4())
+  games.push( newGame )
+  const simplifiedBoard = newGame.getSimplifiedBoard(); // Assuming you have a getBoard method in your Game class
+  console.log(
+     'Success',
+
+      simplifiedBoard,
+    newGame?.gameStarted, // Include the initialization status
+  )
   res.json({
     message: 'Success',
-    game,
+    newGame,
     board: simplifiedBoard,
-    initialized: game?.gameStarted, // Include the initialization status
+    initialized: newGame?.gameStarted, // Include the initialization status
   });
 });
 
 app.post("/begin_game", async (req: Request, res: Response) => {
+
+  const { gameId } = req.body;
+  console.log( games, gameId ,findGame(games , gameId ))
+  console.log(  gameId)
+  const game = findGame(games , gameId )
+
   if (game) {
     game.beginGame();
   } else {
-    throw new Error(" GAME WAS NOT INITIATED");
+    console.error(`GAME DOESNT EXIST ${gameId}`);
   }
 });
 
 app.post('/new_move', (req: any, res: any) => {
-  const { from, to } = req.body;
+  const { from, to, gameId } = req.body;
   let moveSuccessful = false;
+  const game = findGame(games , gameId )
   if (from === undefined || to === undefined || game === null) {
     // console.log(from, to);
     return res.status(400).json({ error: 'There was a problem with the new move', values: { from, to, game } });
@@ -48,7 +76,7 @@ app.post('/new_move', (req: any, res: any) => {
   }
 
   // Extract necessary information from the game object to avoid circular reference
-  const simplifiedBoard = game.getBoard(); // Assuming you have a getBoard method in your Game class
+  const simplifiedBoard = game.getSimplifiedBoard(); // Assuming you have a getBoard method in your Game class
   console.log('x',moveSuccessful)
   res.json({
     message: moveSuccessful,
@@ -58,8 +86,12 @@ app.post('/new_move', (req: any, res: any) => {
 });
 const seen: Array< boolean> = [];// I have added this wierd code because of a json error
 app.get('/game_state', async (req: Request, res: Response) => {
+  const {gameId } = req.query;
+  const game = findGame(games ,  gameId as string )
+  console.log('game found', req.body, gameId, game )
   try {
     if (game) {
+      console.log(game.getSimplifiedBoard(), )
       const cleanGame = JSON.stringify(game, (key, value) => {
         if (typeof value === 'object' && value !== null) {
           if (seen.includes(value)) {
@@ -71,7 +103,7 @@ app.get('/game_state', async (req: Request, res: Response) => {
       });
       res.json({
         message: cleanGame,
-        board: game.getBoard(),
+        board: game.getSimplifiedBoard(),
       });
     } else {
       res.status(404).json({
@@ -83,7 +115,26 @@ app.get('/game_state', async (req: Request, res: Response) => {
     res.status(500).json(  error   );
   }
 });
+app.post('/join_game',  async (req: Request, res: Response) => {
+  const {gameId } = req.body;
+  const game = findGame(games , gameId )
+  try {
+    if (game) {
 
+      res.json({
+        message: game,
+        board: game.getSimplifiedBoard(),
+      });
+    } else {
+      res.status(404).json({
+        error: 'Game not found',
+      });
+    }
+  } catch (error) {
+    // Send the error to the frontend
+    res.status(500).json(  error   );
+  }
+})
 
 app.listen(3001, () => {
   // console.log("\x1Bc"); // ANSI escape code for clearing CMD in Windows

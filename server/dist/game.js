@@ -7,7 +7,7 @@ const grid_1 = __importDefault(require("./grid/grid"));
 const player_1 = __importDefault(require("./player"));
 const utils_1 = require("./utils");
 class Game {
-    constructor(gameState, gameTime) {
+    constructor(gameState, gameTime, gameId) {
         this.curPlayerIndex = 0;
         this.checkedPlayer = "none";
         this.timeInterval = null;
@@ -15,6 +15,7 @@ class Game {
         this.grid = new grid_1.default(8, 8, gameState);
         this.gameTime = gameTime;
         this.players = this.generatePlayers();
+        this.gameId = gameId;
     }
     generatePlayers() {
         const whitePlayer = new player_1.default(this.gameTime, "white");
@@ -51,6 +52,21 @@ class Game {
                 const cell = this.grid.getCellAtIndex(row * 8 + col);
                 const piece = cell === null || cell === void 0 ? void 0 : cell.piece;
                 board.push(piece);
+            }
+        }
+        return board;
+    }
+    getSimplifiedBoard() {
+        const board = [];
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                if (!utils_1.checkInGameBounds) {
+                    board.push(null);
+                    continue;
+                }
+                const cell = this.grid.getCellAtIndex(row * 8 + col);
+                const piece = cell === null || cell === void 0 ? void 0 : cell.piece;
+                board.push(piece === null || piece === void 0 ? void 0 : piece.abbreviation);
             }
         }
         return board;
