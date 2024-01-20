@@ -12,13 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const uuid_1 = require("uuid");
 const cors_1 = __importDefault(require("cors"));
 const game_1 = __importDefault(require("./game")); // Assuming your file is named "game.ts"
-const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
+exports.app = (0, express_1.default)();
+exports.app.use((0, cors_1.default)());
+exports.app.use(express_1.default.json());
 let games = [];
 const beginningState = ['r', '', '', '', 'k', '', '', 'r', 'p', '', '', '', 'p', '', '', '', '', '', '', 'Q', '', '', '', 'q', '', '', '', '', '', '', '', '', '', '', 'r', '', '', '', '', '', '', 'R', '', '', '', '', '', '', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'R', '', '', 'Q', 'K', '', '', 'R',];
 function findGame(games, gameId) {
@@ -27,13 +28,15 @@ function findGame(games, gameId) {
     }
     return games.find((onegame) => (onegame === null || onegame === void 0 ? void 0 : onegame.gameId) === gameId) || null;
 }
-app.get('/game_ids', (req, res) => {
+exports.app.get('/game_ids', (req, res) => {
     const gameIds = games.map((game) => game.gameId);
     res.json(gameIds);
 });
-app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('recieved');
-    let newGame = new game_1.default(beginningState, 600, (0, uuid_1.v4)());
+    const { whiteId, blackId } = req.body;
+    const newGameId = (0, uuid_1.v4)();
+    let newGame = new game_1.default(beginningState, 600, newGameId, whiteId);
     games.push(newGame);
     const simplifiedBoard = newGame.getSimplifiedBoard(); // Assuming you have a getBoard method in your Game class
     console.log('Success', simplifiedBoard, newGame === null || newGame === void 0 ? void 0 : newGame.gameStarted);
@@ -44,19 +47,22 @@ app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0, functio
         initialized: newGame === null || newGame === void 0 ? void 0 : newGame.gameStarted, // Include the initialization status
     });
 }));
-app.post("/begin_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { gameId } = req.body;
+exports.app.post("/begin_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { gameId, playerID } = req.body;
     console.log(games, gameId, findGame(games, gameId));
     console.log(gameId);
     const game = findGame(games, gameId);
-    if (game) {
-        game.beginGame();
+    // if (playerId !== this.players[0].getId()){
+    //   console.error('WRONG ID ', playerId, this.players[0].getId())
+    // }
+    if (game && game.authorizePlayer(playerID)) {
+        game.beginGame(playerID);
     }
     else {
         console.error(`GAME DOESNT EXIST ${gameId}`);
     }
 }));
-app.post('/new_move', (req, res) => {
+exports.app.post('/new_move', (req, res) => {
     const { from, to, gameId } = req.body;
     let moveSuccessful = false;
     const game = findGame(games, gameId);
@@ -80,7 +86,7 @@ app.post('/new_move', (req, res) => {
     });
 });
 const seen = []; // I have added this wierd code because of a json error
-app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { gameId } = req.query;
     const game = findGame(games, gameId);
     console.log('game found', req.body, gameId, game);
@@ -112,9 +118,13 @@ app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(500).json(error);
     }
 }));
-app.post('/join_game', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { gameId } = req.body;
+exports.app.post('/join_game', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { gameId, playerID } = req.body;
     const game = findGame(games, gameId);
+    console.log(game, gameId, 'sought game', req.body);
+    games.forEach(element => {
+        console.log(element.gameId, gameId);
+    });
     try {
         if (game) {
             res.json({
@@ -133,7 +143,7 @@ app.post('/join_game', (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(500).json(error);
     }
 }));
-app.listen(3001, () => {
+exports.app.listen(3001, () => {
     // console.log("\x1Bc"); // ANSI escape code for clearing CMD in Windows
     // console.log("\x1B[2J\x1B[0f"); // ANSI escape code for clearing terminal in Unix-based systems
     console.log("Server is running on port 3001");

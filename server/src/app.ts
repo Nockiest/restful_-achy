@@ -4,7 +4,7 @@ import cors from "cors";
 import Game from "./game"; // Assuming your file is named "game.ts"
 import { PieceLetter } from "./types/types";
 
-const app = express();
+export const app = express();
 app.use(cors());
 app.use(express.json());
 
@@ -28,12 +28,13 @@ app.get('/game_ids', (req: Request, res: Response) => {
 
 app.post("/create_game", async (req: any, res: any) => {
   console.log('recieved')
-  let newGame =new Game(beginningState, 600, uuidv4())
+  const {whiteId,blackId} = req.body
+  const newGameId = uuidv4()
+  let newGame = new Game(beginningState, 600, newGameId, whiteId )
   games.push( newGame )
   const simplifiedBoard = newGame.getSimplifiedBoard(); // Assuming you have a getBoard method in your Game class
   console.log(
      'Success',
-
       simplifiedBoard,
     newGame?.gameStarted, // Include the initialization status
   )
@@ -47,13 +48,16 @@ app.post("/create_game", async (req: any, res: any) => {
 
 app.post("/begin_game", async (req: Request, res: Response) => {
 
-  const { gameId } = req.body;
+  const { gameId ,playerID} = req.body;
   console.log( games, gameId ,findGame(games , gameId ))
   console.log(  gameId)
   const game = findGame(games , gameId )
+// if (playerId !== this.players[0].getId()){
+    //   console.error('WRONG ID ', playerId, this.players[0].getId())
+    // }
 
-  if (game) {
-    game.beginGame();
+  if (game && game.authorizePlayer(playerID)) {
+    game.beginGame(playerID);
   } else {
     console.error(`GAME DOESNT EXIST ${gameId}`);
   }
@@ -115,9 +119,14 @@ app.get('/game_state', async (req: Request, res: Response) => {
     res.status(500).json(  error   );
   }
 });
+
 app.post('/join_game',  async (req: Request, res: Response) => {
-  const {gameId } = req.body;
+  const {gameId, playerID } = req.body;
   const game = findGame(games , gameId )
+  console.log(game, gameId, 'sought game', req.body)
+  games. forEach(element => {
+    console.log(element.gameId, gameId)
+  });
   try {
     if (game) {
 

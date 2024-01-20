@@ -7,23 +7,27 @@ const grid_1 = __importDefault(require("./grid/grid"));
 const player_1 = __importDefault(require("./player"));
 const utils_1 = require("./utils");
 class Game {
-    constructor(gameState, gameTime, gameId) {
+    constructor(gameState, gameTime, gameId, whiteId) {
         this.curPlayerIndex = 0;
         this.checkedPlayer = "none";
         this.timeInterval = null;
         this.gameStarted = false;
         this.grid = new grid_1.default(8, 8, gameState);
         this.gameTime = gameTime;
-        this.players = this.generatePlayers();
+        this.players = this.generatePlayers(whiteId, null);
         this.gameId = gameId;
     }
-    generatePlayers() {
-        const whitePlayer = new player_1.default(this.gameTime, "white");
-        const blackPlayer = new player_1.default(this.gameTime, "black");
+    generatePlayers(whiteId, blackId) {
+        const whitePlayer = new player_1.default(this.gameTime, "white", whiteId);
+        const blackPlayer = new player_1.default(this.gameTime, "black", blackId);
         return [whitePlayer, blackPlayer];
     }
     get curPlayer() {
         return this.players[this.curPlayerIndex];
+    }
+    joinBlackPlayer(blackId) {
+        var _a;
+        (_a = this.players[1]) === null || _a === void 0 ? void 0 : _a.setId(blackId);
     }
     switchPlayer() {
         this.curPlayerIndex = 1 - this.curPlayerIndex; // Toggle between 0 and 1
@@ -71,7 +75,15 @@ class Game {
         }
         return board;
     }
-    beginGame() {
+    authorizePlayer(playerId) {
+        var _a, _b, _c;
+        if (playerId !== ((_a = this.players[0]) === null || _a === void 0 ? void 0 : _a.getId()) && playerId !== ((_b = this.players[1]) === null || _b === void 0 ? void 0 : _b.getId())) {
+            console.error('WRONG ID ', playerId, (_c = this.players[0]) === null || _c === void 0 ? void 0 : _c.getId());
+            return false;
+        }
+        return true;
+    }
+    beginGame(playerId) {
         console.log("BEGINNING GAME ");
         if (!this.gameStarted) {
             console.log("Game has begun!");

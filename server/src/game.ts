@@ -3,31 +3,35 @@ import Piece from "./pieces/defaultPiece";
 import Player from "./player";
 import { BoardIndex, PieceLetter } from "./types/types";
 import { checkInGameBounds } from "./utils";
-
+import { v4 as uuidv4 } from 'uuid';
 export default class Game {
   private curPlayerIndex: number = 0;
   private grid: Grid;
   private gameTime: number;
-  private players: Player[];
+  private players: Array<Player | null>  ;
   private checkedPlayer: string = "none";
   private timeInterval: NodeJS.Timeout | null = null;
   public gameStarted: boolean = false;
   public gameId: string
-  constructor(gameState: Array<PieceLetter>, gameTime: number, gameId:string) {
+  constructor(gameState: Array<PieceLetter>, gameTime: number, gameId:string, whiteId:string, ) {
     this.grid = new Grid(8, 8, gameState);
     this.gameTime = gameTime;
-    this.players = this.generatePlayers();
+    this.players = this.generatePlayers(whiteId,null);
     this.gameId = gameId
   }
 
-  private generatePlayers(): Player[] {
-    const whitePlayer = new Player(this.gameTime, "white");
-    const blackPlayer = new Player(this.gameTime, "black");
+  private generatePlayers(whiteId:string, blackId:string|null): Player[] {
+    const whitePlayer = new Player(this.gameTime, "white",whiteId);
+    const blackPlayer = new Player(this.gameTime, "black", blackId);
     return [whitePlayer, blackPlayer];
   }
 
   get curPlayer(): Player {
-    return this.players[this.curPlayerIndex];
+    return this.players[this.curPlayerIndex] as Player;
+  }
+
+  public joinBlackPlayer(blackId:string){
+    this.players[1]?.setId(blackId)
   }
 
   private switchPlayer(): void {
@@ -78,7 +82,16 @@ export default class Game {
     }
     return board;
  }
-  public beginGame(): void {
+
+ public authorizePlayer(playerId:string):boolean{
+    if (playerId !== this.players[0]?.getId()&&playerId !== this.players[1]?.getId()){
+      console.error('WRONG ID ', playerId, this.players[0]?.getId())
+      return false
+    }
+    return true
+ }
+  public beginGame(playerId:string): void {
+
     console.log("BEGINNING GAME ");
 
     if (!this.gameStarted) {

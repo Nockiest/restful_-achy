@@ -19,13 +19,13 @@ describe('submitMove', () => {
 
   it('should handle successful post request', async () => {
     // Mock a successful response from the server
-    axiosMock.onPost('your-post-endpoint').reply(200, { board: 'mocked board data' });
+    axiosMock.onPost('http://localhost:3001/game_state').reply(200, { board:  ['r','','','','k','','','r', 'p','','','','p','','','','','','','Q','','','','q', '','','','','','','','',    '','','r','','','','','', '','R','','','','','','',  'P','P','P','P','P','P','P','P', 'R','','','Q','K','','', 'R',] });
 
     // Call the function that makes the axios.post request
     const result = await submitMove();
 
     // Assert the expected result or side effects
-    expect(result).toEqual({ board: 'mocked board data' });
+    expect(result).toEqual({ board:  ['r','','','','k','','','r', 'p','','','','p','','','','','','','Q','','','','q', '','','','','','','','',    '','','r','','','','','', '','R','','','','','','',  'P','P','P','P','P','P','P','P', 'R','','','Q','K','','', 'R',] });
     // Add more assertions as needed
   });
 
