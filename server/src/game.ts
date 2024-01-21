@@ -18,6 +18,7 @@ export default class Game {
     this.gameTime = gameTime;
     this.players = this.generatePlayers(whiteId,null);
     this.gameId = gameId
+
   }
 
   private generatePlayers(whiteId:string, blackId:string|null): Player[] {
@@ -33,12 +34,18 @@ export default class Game {
   public joinBlackPlayer(blackId:string){
     this.players[1]?.setId(blackId)
   }
-
+  public getTime(){
+    return [this.players[0]?.getTime(), this.players[1]?.getTime()]
+  }
   private switchPlayer(): void {
     this.curPlayerIndex = 1 - this.curPlayerIndex; // Toggle between 0 and 1
   }
 
   private startCountingTime(): void {
+
+    if (this.timeInterval !== null) {
+      clearInterval(this.timeInterval);
+    }
     this.timeInterval = setInterval(() => {
       this.countTime();
     }, 1000);
@@ -51,6 +58,7 @@ export default class Game {
   }
 
   private countTime(): void {
+    
     this.curPlayer.updateTime();
   }
 
@@ -93,11 +101,11 @@ export default class Game {
   public beginGame(playerId:string): void {
 
     console.log("BEGINNING GAME ");
-
+    this.startCountingTime();
+    this.gameStarted = true;
     if (!this.gameStarted) {
       console.log("Game has begun!");
-      this.startCountingTime();
-      this.gameStarted = true;
+
     } else {
       console.log("The game has already started!");
     }

@@ -6,7 +6,8 @@ export default class Player {
     private kingMoved: boolean = false;
     private leftRookMoved: boolean = false;
     private rightRookMoved: boolean = false;
-    private color: PlayerColor
+    private color: PlayerColor;
+    private timeInterval: NodeJS.Timeout | null = null;
     private id: string|null
     constructor(gameTime: number, color: PlayerColor, id:string|null) {
       this.time = gameTime;
@@ -16,6 +17,7 @@ export default class Player {
 
     public updateTime(): void {
       this.time -= 1;
+     
       // console.log("counting time", this.color, this.time );
       if (this.time <= 0) {
         console.log("TIME RAN OUT", this.time);
@@ -26,6 +28,10 @@ export default class Player {
       return this.id
     }
 
+    public getTime():number{
+      return this.time
+    }
+
     public setId(newId:string){
       if (this.id === null){
         this.id = newId
@@ -33,4 +39,6 @@ export default class Player {
         return new Error ('trying to change an existing player')
       }
     }
+
+
   }

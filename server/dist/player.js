@@ -6,6 +6,7 @@ class Player {
         this.kingMoved = false;
         this.leftRookMoved = false;
         this.rightRookMoved = false;
+        this.timeInterval = null;
         this.time = gameTime;
         this.color = color;
         this.id = id;
@@ -19,6 +20,9 @@ class Player {
     }
     getId() {
         return this.id;
+    }
+    getTime() {
+        return this.time;
     }
     setId(newId) {
         if (this.id === null) {

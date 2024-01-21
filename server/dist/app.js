@@ -20,6 +20,7 @@ const game_1 = __importDefault(require("./game")); // Assuming your file is name
 exports.app = (0, express_1.default)();
 exports.app.use((0, cors_1.default)());
 exports.app.use(express_1.default.json());
+const connectedClients = [];
 let games = [];
 const beginningState = ['r', '', '', '', 'k', '', '', 'r', 'p', '', '', '', 'p', '', '', '', '', '', '', 'Q', '', '', '', 'q', '', '', '', '', '', '', '', '', '', '', 'r', '', '', '', '', '', '', 'R', '', '', '', '', '', '', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'R', '', '', 'Q', 'K', '', '', 'R',];
 function findGame(games, gameId) {
@@ -48,18 +49,27 @@ exports.app.post("/create_game", (req, res) => __awaiter(void 0, void 0, void 0,
     });
 }));
 exports.app.post("/begin_game", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { gameId, playerID } = req.body;
-    console.log(games, gameId, findGame(games, gameId));
-    console.log(gameId);
-    const game = findGame(games, gameId);
-    // if (playerId !== this.players[0].getId()){
-    //   console.error('WRONG ID ', playerId, this.players[0].getId())
-    // }
-    if (game && game.authorizePlayer(playerID)) {
-        game.beginGame(playerID);
+    try {
+        const { gameId, playerID } = req.body;
+        const game = findGame(games, gameId);
+        console.log(games, gameId, game);
+        // if (!game){
+        //   res.status(401).json(  error   );
+        // }
+        console.log(gameId, playerID, game === null || game === void 0 ? void 0 : game.authorizePlayer(playerID));
+        // if (playerId !== this.players[0].getId()){
+        //   console.error('WRONG ID ', playerId, this.players[0].getId())
+        // }
+        if (game && game.authorizePlayer(playerID)) {
+            game.beginGame(playerID);
+        }
+        else {
+            console.error(`GAME DOESNT EXIST ${gameId}`);
+        }
     }
-    else {
-        console.error(`GAME DOESNT EXIST ${gameId}`);
+    catch (error) {
+        // Send the error to the frontend
+        res.status(500).json(error);
     }
 }));
 exports.app.post('/new_move', (req, res) => {
@@ -89,10 +99,10 @@ const seen = []; // I have added this wierd code because of a json error
 exports.app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { gameId } = req.query;
     const game = findGame(games, gameId);
-    console.log('game found', req.body, gameId, game);
+    // console.log('game found', req.body, gameId, game )
     try {
         if (game) {
-            console.log(game.getSimplifiedBoard());
+            // console.log(game.getSimplifiedBoard(), )
             const cleanGame = JSON.stringify(game, (key, value) => {
                 if (typeof value === 'object' && value !== null) {
                     if (seen.includes(value)) {
@@ -105,6 +115,7 @@ exports.app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, f
             res.json({
                 message: cleanGame,
                 board: game.getSimplifiedBoard(),
+                time: game.getTime()
             });
         }
         else {
@@ -121,10 +132,10 @@ exports.app.get('/game_state', (req, res) => __awaiter(void 0, void 0, void 0, f
 exports.app.post('/join_game', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { gameId, playerID } = req.body;
     const game = findGame(games, gameId);
-    console.log(game, gameId, 'sought game', req.body);
-    games.forEach(element => {
-        console.log(element.gameId, gameId);
-    });
+    // console.log(game, gameId, 'sought game', req.body)
+    // games. forEach(element => {
+    //   console.log(element.gameId, gameId)
+    // });
     try {
         if (game) {
             res.json({

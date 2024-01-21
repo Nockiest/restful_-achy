@@ -9,11 +9,17 @@
     <!-- <script type="module" src="./index.js"></script> -->
 
 </head>
- <script  type="module" src="index.js"></script>
- <!-- type="module" -->
-<!-- <script type="module" src="./grafics.js"></script> -->
+<script>
+var exports = {};
+var require = () => {};
+// var post = () => {}
+</script>
+<!-- the lines above allows to use imports in the ts file -->
+ <script   type="module"  src="index.js"></script>
+
 <body style="display: flex; flex-direction: row; justify-content: center; ">
  <div class="left-side">
+    <p>Player Id: <span id='player-id'></span></p>
   <div class="button-div" style="display: flex; flex-direction: column; margin: 4em;">
     <button id="generate-game-btn">GENERATE GAME</button>
     <button  id="begin-game-btn">BEGIN GAME</button>
@@ -21,14 +27,18 @@
     <button  id="find-game-btn">FIND GAME</button>
    </div>
    <div class="games-list">
-    <p>GAME NUMBER <span id="game-number-display"></span></p>
+
     GAMES <ul id="games-list" style="cursor: pointer;"> </ul>
    </div>
  </div>
 
- <div class="right-side">
-  <div id="board-container"></div>
+ <main  >
+  <div style="display: flex; flex-direction: row; justify-content: center; margin: 0 auto; padding: auto;">
+    <div id="board-container"></div>
+  </div>
+
   <div>
+    <p>GAME NUMBER <span id="game-number-display"></span></p>
     <label for="from">From: </label>
     <input type="text" id="from" placeholder="Enter from index">
     <label for="to">To: </label>
@@ -37,7 +47,16 @@
   </div>
   <div>Debug <span id ="debug" style="color:red"></span></div>
 
- </div>
+ </main>
+<div class="right-side">
+  <div id="gameInfo">
+    <p id=BlackTime class="time">Remaining Time:</p>
+    <p id="WhitwMissingPieces"></p>
+    <p id="curPlayer"></p>
+    <p id="blackMissingPieces"></p>
+    <p id=WhiteTime  class="time">Remaining Time:</p>
 
+  </div>
+</div>
 </body>
 </html>

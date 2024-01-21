@@ -1,5 +1,5 @@
 import axios from "https://cdn.skypack.dev/axios";
-import { createListItems } from "./utils.js";
+import { createListItems, showError } from "./utils.js";
 import { renderBoard } from "./grafics.js";
 // import { v4 as uuidv4 } from 'uuidv4';
 // const utils = require('utils');
@@ -11,25 +11,14 @@ const getGamesUrl = "http://localhost:3001/game_ids";
 const joinGameUrl = "http://localhost:3001/join_game";
 
 let gameId = null;
-let playerID = 'abcd';
+let playerID = "abcd";
 const createGameData = {
   whiteId: playerID,
-  blackId: 'black',
+  blackId: "black",
   gameType: "Chess",
 }; // currently unusedS
 
-
 // Add a click event listener to the <ul> element
-
-function showError(errorString) {
-  console.error(errorString);
-  if (typeof errorString !== "string") {
-    document.getElementById("debug").innerHTML =
-      "printing value that is not a string " + errorString;
-  } else {
-    document.getElementById("debug").innerHTML = errorString;
-  }
-}
 
 document.getElementById("find-game-btn").addEventListener("click", listGames);
 document.getElementById("new-move-btn").addEventListener("click", submitMove);
@@ -39,17 +28,18 @@ document
   .getElementById("generate-game-btn")
   .addEventListener("click", generateGame);
 const gamesList = document.getElementById("games-list");
-gamesList.addEventListener('click', handleGameListClick);
-
+const gameNumber = document.getElementById("game-number-display");
+gamesList.addEventListener("click", handleGameListClick);
+setInterval(fetchBoard, 1000);
 
 function handleGameListClick(event) {
   // Check if the clicked element is an <li> element
-  if (event.target.tagName === 'LI') {
+  if (event.target.tagName === "LI") {
     // Retrieve the innerHTML of the clicked <li> element
     const innerHTML = event.target.innerHTML;
     // Return the innerHTML
-    console.log(innerHTML)
-    joinGame(innerHTML)
+    console.log(innerHTML);
+    joinGame(innerHTML);
   }
 }
 
@@ -70,7 +60,6 @@ function submitMove() {
         renderBoard(response.data.board);
       })
       .catch((error) => {
-
         showError("New Move Axios error:", error);
       });
   } else {
@@ -89,16 +78,20 @@ function generateGame() {
       // Wait for the game to initialize before making further calls
       // return axios.post(beginGameUrl);
       listGames();
-      fetchBoard()
+      fetchBoard();
+      return  beginGame()
     })
-    .catch((error) => {
 
+
+    .catch((error) => {
       showError(error);
     });
 }
 
 function fetchBoard() {
-  console.log(gameId);
+  if (!gameId) {
+    return;
+  }
   axios
     .get(gameStateUrl, { params: { gameId } })
     .then((response) => {
@@ -107,19 +100,20 @@ function fetchBoard() {
       //   showError(`HTTP error! Status: ${response.status}`);
       //   throw new Error(`HTTP error! Status: ${response.status}`);
       // }
-
+      console.log(response.data.time, document.getElementById('BlackTime'), document.getElementById('WhiteTime') )
       renderBoard(response.data.board);
+      document.getElementById('BlackTime').innerHTML = response.data.time[1]
+      document.getElementById('WhiteTime').innerHTML = response.data.time[0]
     })
     .catch((error) => {
       showError(`Fetch Game State error:  ${error}`);
-
     });
 }
 
 function beginGame() {
   console.log(gameId);
   axios
-    .post(beginGameUrl, {gameId, playerID})
+    .post(beginGameUrl, { gameId, playerID })
     .then((response) => {
       console.log("response");
       if (!response.ok) {
@@ -134,10 +128,10 @@ function beginGame() {
       console.log(data);
       renderBoard(data.board);
       gameId = data.gameId;
+      gameNumber.innerHTML = gameId;
     })
     .catch((error) => {
       showError(`Fetch Game State error:  ${error}`);
-
     });
 }
 
@@ -163,6 +157,7 @@ function joinGame(lookedGameId) {
       console.log(data);
       renderBoard(data.board);
       gameId = lookedGameId;
+      gameNumber.innerHTML = gameId;
     })
     .catch((error) => {
       showError(`Fetch Game State error: ${error}`);
@@ -178,10 +173,11 @@ function listGames() {
       // gamesList.innerHTML = response.data;
     })
     .catch((error) => {
-
       showError("New List Games error:", error);
     });
 }
+
+
 // listGames()
 // fetch(gameStateUrl)
 //   .then(response => {

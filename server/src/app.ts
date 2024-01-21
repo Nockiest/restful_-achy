@@ -7,6 +7,7 @@ import { PieceLetter } from "./types/types";
 export const app = express();
 app.use(cors());
 app.use(express.json());
+const connectedClients: { gameId: string; res: Response }[] = [];
 
 let games: Game[ ] = [ ];
 const beginningState: Array<PieceLetter> = ['r','','','','k','','','r', 'p','','','','p','','','','','','','Q','','','','q', '','','','','','','','',    '','','r','','','','','', '','R','','','','','','',  'P','P','P','P','P','P','P','P', 'R','','','Q','K','','', 'R',]
@@ -32,6 +33,7 @@ app.post("/create_game", async (req: any, res: any) => {
   const newGameId = uuidv4()
   let newGame = new Game(beginningState, 600, newGameId, whiteId )
   games.push( newGame )
+
   const simplifiedBoard = newGame.getSimplifiedBoard(); // Assuming you have a getBoard method in your Game class
   console.log(
      'Success',
@@ -47,11 +49,16 @@ app.post("/create_game", async (req: any, res: any) => {
 });
 
 app.post("/begin_game", async (req: Request, res: Response) => {
-
+try {
   const { gameId ,playerID} = req.body;
-  console.log( games, gameId ,findGame(games , gameId ))
-  console.log(  gameId)
   const game = findGame(games , gameId )
+  console.log( games, gameId ,game)
+  // if (!game){
+  //   res.status(401).json(  error   );
+  // }
+  console.log(  gameId, playerID, game?.authorizePlayer(playerID))
+
+
 // if (playerId !== this.players[0].getId()){
     //   console.error('WRONG ID ', playerId, this.players[0].getId())
     // }
@@ -61,6 +68,11 @@ app.post("/begin_game", async (req: Request, res: Response) => {
   } else {
     console.error(`GAME DOESNT EXIST ${gameId}`);
   }
+} catch  (error) {
+  // Send the error to the frontend
+  res.status(500).json(  error   );
+}
+
 });
 
 app.post('/new_move', (req: any, res: any) => {
@@ -92,10 +104,10 @@ const seen: Array< boolean> = [];// I have added this wierd code because of a js
 app.get('/game_state', async (req: Request, res: Response) => {
   const {gameId } = req.query;
   const game = findGame(games ,  gameId as string )
-  console.log('game found', req.body, gameId, game )
+  // console.log('game found', req.body, gameId, game )
   try {
     if (game) {
-      console.log(game.getSimplifiedBoard(), )
+      // console.log(game.getSimplifiedBoard(), )
       const cleanGame = JSON.stringify(game, (key, value) => {
         if (typeof value === 'object' && value !== null) {
           if (seen.includes(value)) {
@@ -108,6 +120,7 @@ app.get('/game_state', async (req: Request, res: Response) => {
       res.json({
         message: cleanGame,
         board: game.getSimplifiedBoard(),
+        time: game.getTime()
       });
     } else {
       res.status(404).json({
@@ -123,10 +136,10 @@ app.get('/game_state', async (req: Request, res: Response) => {
 app.post('/join_game',  async (req: Request, res: Response) => {
   const {gameId, playerID } = req.body;
   const game = findGame(games , gameId )
-  console.log(game, gameId, 'sought game', req.body)
-  games. forEach(element => {
-    console.log(element.gameId, gameId)
-  });
+  // console.log(game, gameId, 'sought game', req.body)
+  // games. forEach(element => {
+  //   console.log(element.gameId, gameId)
+  // });
   try {
     if (game) {
 

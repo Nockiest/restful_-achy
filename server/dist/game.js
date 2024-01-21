@@ -29,10 +29,17 @@ class Game {
         var _a;
         (_a = this.players[1]) === null || _a === void 0 ? void 0 : _a.setId(blackId);
     }
+    getTime() {
+        var _a, _b;
+        return [(_a = this.players[0]) === null || _a === void 0 ? void 0 : _a.getTime(), (_b = this.players[1]) === null || _b === void 0 ? void 0 : _b.getTime()];
+    }
     switchPlayer() {
         this.curPlayerIndex = 1 - this.curPlayerIndex; // Toggle between 0 and 1
     }
     startCountingTime() {
+        if (this.timeInterval !== null) {
+            clearInterval(this.timeInterval);
+        }
         this.timeInterval = setInterval(() => {
             this.countTime();
         }, 1000);
@@ -85,10 +92,10 @@ class Game {
     }
     beginGame(playerId) {
         console.log("BEGINNING GAME ");
+        this.startCountingTime();
+        this.gameStarted = true;
         if (!this.gameStarted) {
             console.log("Game has begun!");
-            this.startCountingTime();
-            this.gameStarted = true;
         }
         else {
             console.log("The game has already started!");
